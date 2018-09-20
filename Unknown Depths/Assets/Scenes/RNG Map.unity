@@ -219,6 +219,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mMapWidth: 20
   mMapHeight: 20
+  mMapContainer: {fileID: 1169217079}
+  mTilePrefab: {fileID: 1473856163004920, guid: 96f40d36fcfe2a2439cb32953f65dc98,
+    type: 2}
+  mTileSize: {x: 16, y: 16}
+  mMapTexture: {fileID: 2800000, guid: d0dc76b8322da844797d4f6bf0de7f7c, type: 3}
 --- !u!4 &1169217081
 Transform:
   m_ObjectHideFlags: 0

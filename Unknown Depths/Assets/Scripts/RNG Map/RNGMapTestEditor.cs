@@ -27,6 +27,5 @@ public class RNGMapTestEditor : Editor {
                 script.MakeMap();
             }
         }
-        base.OnInspectorGUI();
     }
 }

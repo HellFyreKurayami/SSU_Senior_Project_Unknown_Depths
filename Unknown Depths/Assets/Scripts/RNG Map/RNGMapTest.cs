@@ -16,6 +16,16 @@ public class RNGMapTest : MonoBehaviour {
     public int mMapWidth = 20;
     public int mMapHeight = 20;
 
+    [Space]
+    [Header("Visualize Map")]
+    public GameObject mMapContainer;
+    public GameObject mTilePrefab;
+    public Vector2 mTileSize = new Vector2(16, 16);
+
+    [Space]
+    [Header("Map Sprites")]
+    public Texture2D mMapTexture;
+
     public Map mMap;
 
 	// Use this for initialization
@@ -27,5 +37,48 @@ public class RNGMapTest : MonoBehaviour {
     {
         mMap.NewMap(mMapWidth, mMapHeight);
         Debug.Log("Created a new map; " + mMap.mCol + " x " + mMap.mRow + " dimensions");
+        CreateGrid();
+    }
+
+    void CreateGrid()
+    {
+        ClearMap();
+        Sprite[] mSprites = Resources.LoadAll<Sprite>(mMapTexture.name);
+
+        var tTotal = mMap.mTiles.Length;
+        var mMaxColumns = mMap.mCol;
+        var tCol = 0;
+        var tRow = 0;
+
+        for(var i = 0; i<tTotal; i++)
+        {
+            tCol = i % mMaxColumns;
+
+            var tNewX = tCol * mTileSize.x;
+            var tNewY = -tRow * mTileSize.y;
+
+            var go = Instantiate(mTilePrefab);
+            go.name = "Tile " + i;
+            go.transform.SetParent(mMapContainer.transform);
+            go.transform.position = new Vector3(tNewX, tNewY, 0);
+
+            var spriteID = 0;
+            var sr = go.GetComponent<SpriteRenderer>();
+            sr.sprite = mSprites[spriteID];
+
+            if(tCol == (mMaxColumns - 1))
+            {
+                tRow++;
+            }
+        }
+    }
+
+    void ClearMap()
+    {
+        var children = mMapContainer.transform.GetComponentsInChildren<Transform>();
+        for(var i = children.Length - 1; i > 0; i--)
+        {
+            Destroy(children[i].gameObject);
+        }
     }
 }

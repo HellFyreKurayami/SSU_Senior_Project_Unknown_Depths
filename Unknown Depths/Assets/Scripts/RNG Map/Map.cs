@@ -21,17 +21,17 @@ public class Map {
         mCol = mWidth;
         mRow = mHeight;
 
-        mTiles = new Tile[mCol * mRow]; //1D Arry, but will be using math to traverse
-                                        //the array as if it was a 2D Array
+        mTiles = new Tile[mCol * mRow]; // 1D Arry, but will be using math to traverse
+                                        // the array as if it was a 2D Array
 
         CreateTiles();
     }
 
     private void CreateTiles()
     {
-        var tTotal = mTiles.Length;
-        for(var i = 0; i< tTotal; i++)
-        {
+        var tTotal = mTiles.Length; // Total Tiles
+        for(var i = 0; i< tTotal; i++) // For each tile, create a new instance
+        {                              // of the Tile class
             var mTile = new Tile();
             mTile.mID = i;
             mTiles[i] = mTile;
