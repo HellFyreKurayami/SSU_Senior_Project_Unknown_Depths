@@ -123,6 +123,8 @@ GameObject:
   - component: {fileID: 519420032}
   - component: {fileID: 519420031}
   - component: {fileID: 519420029}
+  - component: {fileID: 519420030}
+  - component: {fileID: 519420033}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -137,6 +139,18 @@ AudioListener:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_Enabled: 1
+--- !u!114 &519420030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 519420028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 149a44381ab59404c931c676a66a4265, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  nativeRes: {x: 160, y: 144}
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0
@@ -190,6 +204,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &519420033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 519420028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a817641af4458b40be6c6889a8b336e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 4
 --- !u!1 &1169217079
 GameObject:
   m_ObjectHideFlags: 0
@@ -217,8 +243,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f42001afa3cddd4796d5e66466332c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mMapWidth: 20
-  mMapHeight: 20
+  mMapWidth: 200
+  mMapHeight: 200
   mMapContainer: {fileID: 1169217079}
   mTilePrefab: {fileID: 1473856163004920, guid: 96f40d36fcfe2a2439cb32953f65dc98,
     type: 2}
