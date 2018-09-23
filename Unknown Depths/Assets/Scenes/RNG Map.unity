@@ -150,7 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 149a44381ab59404c931c676a66a4265, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nativeRes: {x: 160, y: 144}
+  nativeRes: {x: 320, y: 288}
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0
@@ -160,7 +160,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.5019608, g: 0.5019608, b: 0.5019608, a: 0}
   m_projectionMatrixMode: 1
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
@@ -243,13 +243,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f42001afa3cddd4796d5e66466332c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mMapWidth: 200
-  mMapHeight: 200
-  mMapContainer: {fileID: 1169217079}
-  mTilePrefab: {fileID: 1473856163004920, guid: 96f40d36fcfe2a2439cb32953f65dc98,
-    type: 2}
-  mTileSize: {x: 16, y: 16}
-  mMapTexture: {fileID: 2800000, guid: d0dc76b8322da844797d4f6bf0de7f7c, type: 3}
+  MapWidth: 20
+  MapHeight: 20
+  MapContainer: {fileID: 1169217079}
+  TilePrefab: {fileID: 1473856163004920, guid: 96f40d36fcfe2a2439cb32953f65dc98, type: 2}
+  TileSize: {x: 16, y: 16}
+  MapTexture: {fileID: 2800000, guid: 02307c5eacea591419e6c3f05529a152, type: 3}
+  erodePercent: 0.5
+  erodeIter: 2
+  treePercent: 0.3
+  hillPercent: 0.2
+  mountainPercent: 0.1
 --- !u!4 &1169217081
 Transform:
   m_ObjectHideFlags: 0

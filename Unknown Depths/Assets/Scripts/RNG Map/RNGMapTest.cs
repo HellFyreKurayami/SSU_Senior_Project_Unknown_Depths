@@ -13,69 +13,101 @@ using UnityEngine;
 public class RNGMapTest : MonoBehaviour {
 
     [Header("Map Dimensions")]
-    public int mMapWidth = 20;
-    public int mMapHeight = 20;
+    public int MapWidth = 20;
+    public int MapHeight = 20;
 
     [Space]
     [Header("Visualize Map")]
-    public GameObject mMapContainer;
-    public GameObject mTilePrefab;
-    public Vector2 mTileSize = new Vector2(16, 16);
+    public GameObject MapContainer;
+    public GameObject TilePrefab;
+    public Vector2 TileSize = new Vector2(16, 16);
 
     [Space]
     [Header("Map Sprites")]
-    public Texture2D mMapTexture;
+    public Texture2D MapTexture;
 
-    public Map mMap;
+    [Space]
+    [Header("Populate Map")]
+    [Range(0, .9f)]
+    public float erodePercent = .5f;
+    public int erodeIter = 2;
+    [Range(0, .9f)]
+    public float treePercent = .3f;
+    [Range(0, .9f)]
+    public float hillPercent = .2f;
+    [Range(0, .9f)]
+    public float mountainPercent = .1f;
+    [Range(0, .9f)]
+    public float townPercent = .05f;
+    [Range(0, .9f)]
+    public float monsterPercent = .1f;
+    [Range(0, .9f)]
+    public float lakePercent = .05f;
+
+    public Map Map;
 
 	// Use this for initialization
 	void Start () {
-        mMap = new Map();
+        Map = new Map();
 	}
 	
     public void MakeMap()
     {
-        mMap.NewMap(mMapWidth, mMapHeight);
-        Debug.Log("Created a new map; " + mMap.mCol + " x " + mMap.mRow + " dimensions");
+        Map.NewMap(MapWidth, MapHeight);
+        Map.CreateIsland(
+            erodePercent,
+            erodeIter,
+            treePercent,
+            hillPercent,
+            mountainPercent,
+            townPercent,
+            monsterPercent,
+            lakePercent
+        );
         CreateGrid();
     }
 
     void CreateGrid()
     {
         ClearMap();
-        Sprite[] mSprites = Resources.LoadAll<Sprite>(mMapTexture.name);
+        Sprite[] mSprites = Resources.LoadAll<Sprite>(MapTexture.name);
 
-        var tTotal = mMap.mTiles.Length;
-        var mMaxColumns = mMap.mCol;
-        var tCol = 0;
-        var tRow = 0;
+        var Total = Map.tiles.Length;
+        var MaxColumns = Map.col;
+        var Col = 0;
+        var Row = 0;
 
-        for(var i = 0; i<tTotal; i++)
+        for(var i = 0; i<Total; i++)
         {
-            tCol = i % mMaxColumns;
+            Col = i % MaxColumns;
 
-            var tNewX = tCol * mTileSize.x;
-            var tNewY = -tRow * mTileSize.y;
+            var tNewX = Col * TileSize.x;
+            var tNewY = -Row * TileSize.y;
 
-            var go = Instantiate(mTilePrefab);
+            var go = Instantiate(TilePrefab);
             go.name = "Tile " + i;
-            go.transform.SetParent(mMapContainer.transform);
+            go.transform.SetParent(MapContainer.transform);
             go.transform.position = new Vector3(tNewX, tNewY, 0);
 
-            var spriteID = 0;
-            var sr = go.GetComponent<SpriteRenderer>();
-            sr.sprite = mSprites[spriteID];
+            var tile = Map.tiles[i];
+            var spriteID = tile.AutoTileID;
 
-            if(tCol == (mMaxColumns - 1))
+            if (spriteID >= 0)
             {
-                tRow++;
+                var sr = go.GetComponent<SpriteRenderer>();
+                sr.sprite = mSprites[spriteID];
+            }
+
+            if(Col == (MaxColumns - 1))
+            {
+                Row++;
             }
         }
     }
 
     void ClearMap()
     {
-        var children = mMapContainer.transform.GetComponentsInChildren<Transform>();
+        var children = MapContainer.transform.GetComponentsInChildren<Transform>();
         for(var i = children.Length - 1; i > 0; i--)
         {
             Destroy(children[i].gameObject);
