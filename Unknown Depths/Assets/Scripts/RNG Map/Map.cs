@@ -132,13 +132,12 @@ public class Map {
         for (var i = 0; i < total; i++)
         {
             var tile = tiles[i];
+            Debug.Log(tile.Neighbors.Length);
+            if(type == TileType.EMPTY)
             {
-                if(type == TileType.EMPTY)
-                {
-                    tile.ClearNeighbors();
-                }
-                tile.AutoTileID = (int)type;
+                tile.ClearNeighbors();
             }
+            tile.AutoTileID = (int)type;
         }
     }
 

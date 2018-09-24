@@ -18,7 +18,7 @@ public enum Sides
     LEFT,
     TOP
 }
-public class Tile {
+public class Tile{
 
     public int ID = 0; //Unique ID for each tile
     public Tile[] Neighbors = new Tile[4]; //Tiles adjacent to this tile
