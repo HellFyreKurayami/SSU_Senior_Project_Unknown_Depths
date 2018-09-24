@@ -31,7 +31,6 @@ public class MapMaker : MonoBehaviour {
     [Header("Populate Map")]
     [Range(0, 70)]
     public int caveErosion = 50;
-    public int smoothIterations = 2;
 
     public PreciseMap Map;
 
@@ -44,7 +43,7 @@ public class MapMaker : MonoBehaviour {
     {
         Map.CreateMap(MapWidth, MapHeight);
         Debug.Log("Cave Created");
-        Map.CreateCave(caveErosion, smoothIterations);
+        Map.CreateCave(caveErosion);
         CreateGrid();
     }
 

@@ -69,7 +69,7 @@ public class PreciseMap {
         FindNeighbors();
     }
 
-    public void CreateCave(int caveErode, int smoothIter)
+    public void CreateCave(int caveErode)
     {
         var seed = Time.time.ToString();
 
@@ -96,16 +96,16 @@ public class PreciseMap {
                     tiles[i].ClearNeighbors();
                     tiles[i].AutoTileID = (int)TilePiece.EMPTY;
                 }
+                else
+                {
+                    //tiles[i].CalcAutoTileID();
+                }
             }
 
             if(Column == (MaxCol - 1))
             {
                 Row++;
             }
-        }
-        for (var i = 0; i < smoothIter; i++)
-        {
-            SmoothCave();
         }
     }
 
@@ -140,7 +140,41 @@ public class PreciseMap {
         }
     }
 
-    private void SmoothCave()
+    /*private void PreciseNeighbor(PreciseTile tile)
+    {
+        for (var r = 0; r < row; r++)
+        {
+            for (var c = 0; c < col; c++)
+            {
+                if(tile.TileID == (col * r + c))
+                {
+                    if (r < row - 1)
+                    {
+                        tile.AddNeighbor(Sides.BOTTOM, tiles[col * (r + 1) + c]);
+                    }
+
+                    if (c < col - 1)
+                    {
+                        tile.AddNeighbor(Sides.RIGHT, tiles[col * r + c + 1]);
+                    }
+
+                    if (c > 0)
+                    {
+                        tile.AddNeighbor(Sides.LEFT, tiles[col * r + c - 1]);
+                    }
+
+                    if (r > 0)
+                    {
+                        tile.AddNeighbor(Sides.TOP, tiles[col * (r - 1) + c]);
+                    }
+
+                    break;
+                }
+            }
+        }
+    }*/
+
+    /*private void SmoothCave()
     {
         var total = tiles.Length;
 
@@ -161,6 +195,10 @@ public class PreciseMap {
                 tiles[i].ClearNeighbors();
                 tiles[i].AutoTileID = (int)TilePiece.EMPTY;
             }
+            else if(nCount < 2 && tiles[i].AutoTileID >= 0)
+            {
+                tiles[i].CalcAutoTileID();
+            }
         }
-    }
+    }*/
 }

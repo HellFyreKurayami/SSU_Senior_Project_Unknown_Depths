@@ -66,7 +66,7 @@ public class PreciseTile{
         CalcAutoTileID();
     }
 
-    private void CalcAutoTileID()
+    public void CalcAutoTileID()
     {
         var sidesValues = new StringBuilder();
         foreach (PreciseTile tile in Neighbors)
