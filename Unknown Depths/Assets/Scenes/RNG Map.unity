@@ -150,7 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 149a44381ab59404c931c676a66a4265, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nativeRes: {x: 320, y: 288}
+  nativeRes: {x: 640, y: 576}
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0
@@ -215,7 +215,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a817641af4458b40be6c6889a8b336e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 4
+  speed: 6
 --- !u!1001 &2039984143
 Prefab:
   m_ObjectHideFlags: 0

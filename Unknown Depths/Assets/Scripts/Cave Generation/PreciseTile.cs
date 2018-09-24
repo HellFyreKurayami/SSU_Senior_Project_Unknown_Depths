@@ -26,6 +26,7 @@ public class PreciseTile{
     public int TileID = 0; //Unique ID for each tile object.
     public PreciseTile[] Neighbors = new PreciseTile[4]; //Contains all tiles adjacent to calling tile object
     public int AutoTileID; //Contains a reference to the sprite called on render
+    public int IsChecked = 0; //Used for region removal, otherwise useless
 
     public void AddNeighbor(Sides side, PreciseTile tile)
     {

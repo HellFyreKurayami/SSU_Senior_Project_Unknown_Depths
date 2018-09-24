@@ -31,6 +31,10 @@ public class MapMaker : MonoBehaviour {
     [Header("Populate Map")]
     [Range(0, 70)]
     public int caveErosion = 50;
+    [Range(0, 15)]
+    public int roomThreshold = 6;
+    [Range(0, 15)]
+    public int wallThreshold = 6;
 
     public PreciseMap Map;
 
@@ -42,8 +46,8 @@ public class MapMaker : MonoBehaviour {
     public void Create()
     {
         Map.CreateMap(MapWidth, MapHeight);
-        Debug.Log("Cave Created");
-        Map.CreateCave(caveErosion);
+        //Debug.Log("Cave Created");
+        Map.CreateCave(caveErosion, roomThreshold);
         CreateGrid();
     }
 

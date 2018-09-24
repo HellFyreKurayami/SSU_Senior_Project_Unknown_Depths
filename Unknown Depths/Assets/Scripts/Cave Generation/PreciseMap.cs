@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using System.Linq;
 using UnityEngine;
 
@@ -63,13 +64,14 @@ public class PreciseMap {
         {
             var tile = new PreciseTile();
             tile.TileID = i;
+            tile.IsChecked = 0;
             tiles[i] = tile;
         }
 
         FindNeighbors();
     }
 
-    public void CreateCave(int caveErode)
+    public void CreateCave(int caveErode, int roomThresh)
     {
         var seed = Time.time.ToString();
 
@@ -96,10 +98,6 @@ public class PreciseMap {
                     tiles[i].ClearNeighbors();
                     tiles[i].AutoTileID = (int)TilePiece.EMPTY;
                 }
-                else
-                {
-                    //tiles[i].CalcAutoTileID();
-                }
             }
 
             if(Column == (MaxCol - 1))
@@ -107,6 +105,8 @@ public class PreciseMap {
                 Row++;
             }
         }
+
+        DetectRegions(roomThresh);
     }
 
     private void FindNeighbors()
@@ -140,65 +140,75 @@ public class PreciseMap {
         }
     }
 
-    /*private void PreciseNeighbor(PreciseTile tile)
+    struct PreciseTileChecker
     {
-        for (var r = 0; r < row; r++)
+        public int tileID;
+        public int IsChecked;
+
+        public PreciseTileChecker(int ID)
         {
-            for (var c = 0; c < col; c++)
+            tileID = ID;
+            IsChecked = 0;
+        }
+    }
+    
+    private void DetectRegions(int roomSize)
+    {
+        List<List<PreciseTileChecker>> caveRegions = GetRegions(0);
+        foreach(List<PreciseTileChecker> cavern in caveRegions)
+        {
+            if(cavern.Count < roomSize)
             {
-                if(tile.TileID == (col * r + c))
+                foreach(PreciseTileChecker Tile in cavern)
                 {
-                    if (r < row - 1)
-                    {
-                        tile.AddNeighbor(Sides.BOTTOM, tiles[col * (r + 1) + c]);
-                    }
-
-                    if (c < col - 1)
-                    {
-                        tile.AddNeighbor(Sides.RIGHT, tiles[col * r + c + 1]);
-                    }
-
-                    if (c > 0)
-                    {
-                        tile.AddNeighbor(Sides.LEFT, tiles[col * r + c - 1]);
-                    }
-
-                    if (r > 0)
-                    {
-                        tile.AddNeighbor(Sides.TOP, tiles[col * (r - 1) + c]);
-                    }
-
-                    break;
+                    tiles[Tile.tileID].ClearNeighbors();
+                    tiles[Tile.tileID].AutoTileID = (int)TilePiece.EMPTY;
                 }
             }
         }
-    }*/
+        Debug.Log("Finished Dectecting and Removing Regions");
+    }
 
-    /*private void SmoothCave()
+    private List<List<PreciseTileChecker>> GetRegions(int TileType)
     {
-        var total = tiles.Length;
-
-        for(var i = 0; i < total; i++)
+        List<List<PreciseTileChecker>> caverns = new List<List<PreciseTileChecker>>();
+        for(var r = 0; r < row; r++)
         {
-            var tile = tiles[i];
-            var nCount = 0;
-
-            for(var j = 0; j < tile.Neighbors.Length; j++)
+            for(var c = 0; c < col; c++)
             {
-                if (tile.Neighbors[j] != null)
+                if(tiles[col * r + c].AutoTileID >= TileType)
                 {
-                    nCount++;
+                    List<PreciseTileChecker> newCavern = GetRegionTiles(col * r + c);
+                    caverns.Add(newCavern);
                 }
             }
-            if (nCount > 2)
+        }
+        Debug.Log("Exited For Loop in GetRegions()");
+        return caverns;
+    }
+
+    private List<PreciseTileChecker> GetRegionTiles(int Tile)
+    {
+        List<PreciseTileChecker> caveTiles = new List<PreciseTileChecker>();
+
+        Queue<PreciseTileChecker> queue = new Queue<PreciseTileChecker>();
+        queue.Enqueue(new PreciseTileChecker(Tile));
+        tiles[Tile].IsChecked = 1;
+
+        while(queue.Count > 0)
+        {
+            PreciseTileChecker tile = queue.Dequeue();
+            caveTiles.Add(tile);
+
+            foreach(PreciseTile neighbor in tiles[Tile].Neighbors)
             {
-                tiles[i].ClearNeighbors();
-                tiles[i].AutoTileID = (int)TilePiece.EMPTY;
-            }
-            else if(nCount < 2 && tiles[i].AutoTileID >= 0)
-            {
-                tiles[i].CalcAutoTileID();
+                if(neighbor != null && neighbor.IsChecked == 0 && tiles[neighbor.TileID].AutoTileID >= 0)
+                {
+                    neighbor.IsChecked = 1;
+                    queue.Enqueue(new PreciseTileChecker(neighbor.TileID));
+                }
             }
         }
-    }*/
+        return caveTiles;
+    }
 }
