@@ -18,6 +18,11 @@ public class MapMaker : MonoBehaviour {
     public int MapHeight = 20;
 
     [Space]
+    [Header("Map Seed *Optional")]
+    public bool UseSeed = false;
+    public string Seed = "";
+
+    [Space]
     [Header("Visualize Map")]
     public GameObject MapContainer;
     public GameObject TilePrefab;
@@ -29,12 +34,10 @@ public class MapMaker : MonoBehaviour {
 
     [Space]
     [Header("Populate Map")]
-    [Range(0, 70)]
-    public int caveErosion = 50;
-    [Range(0, 15)]
+    [Range(0, 50)]
+    public int caveErosion = 25;
+    [Range(0, 10)]
     public int roomThreshold = 6;
-    [Range(0, 15)]
-    public int wallThreshold = 6;
 
     public PreciseMap Map;
 
@@ -47,7 +50,7 @@ public class MapMaker : MonoBehaviour {
     {
         Map.CreateMap(MapWidth, MapHeight);
         //Debug.Log("Cave Created");
-        Map.CreateCave(caveErosion, roomThreshold);
+        Map.CreateCave(UseSeed, Seed, caveErosion, roomThreshold);
         CreateGrid();
     }
 

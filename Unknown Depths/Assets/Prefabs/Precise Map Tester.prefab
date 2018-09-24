@@ -53,9 +53,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MapWidth: 50
   MapHeight: 50
+  UseSeed: 0
+  Seed: 
   MapContainer: {fileID: 1585396838307022}
   TilePrefab: {fileID: 1473856163004920, guid: 96f40d36fcfe2a2439cb32953f65dc98, type: 2}
   TileSize: {x: 16, y: 16}
   MapTexture: {fileID: 2800000, guid: 02307c5eacea591419e6c3f05529a152, type: 3}
-  caveErosion: 70
-  smoothIterations: 1
+  caveErosion: 34
+  roomThreshold: 2

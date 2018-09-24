@@ -71,9 +71,17 @@ public class PreciseMap {
         FindNeighbors();
     }
 
-    public void CreateCave(int caveErode, int roomThresh)
+    public void CreateCave(bool useSeed, string newSeed,int caveErode, int roomThresh)
     {
-        var seed = Time.time.ToString();
+        var seed = "";
+        if (useSeed)
+        {
+            seed = newSeed;
+        }
+        else
+        {
+            seed = Time.time.ToString();
+        }
 
         System.Random psuRand = new System.Random(seed.GetHashCode());
 
