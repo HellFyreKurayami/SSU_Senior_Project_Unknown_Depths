@@ -34,9 +34,9 @@ public class MapMaker : MonoBehaviour {
 
     [Space]
     [Header("Populate Map")]
-    [Range(0, 50)]
+    [Range(20, 70)]
     public int caveErosion = 25;
-    [Range(0, 10)]
+    [Range(0, 15)]
     public int roomThreshold = 6;
 
     public PreciseMap Map;

@@ -64,7 +64,6 @@ public class PreciseMap {
         {
             var tile = new PreciseTile();
             tile.TileID = i;
-            tile.IsChecked = 0;
             tiles[i] = tile;
         }
 
@@ -150,13 +149,13 @@ public class PreciseMap {
 
     struct PreciseTileChecker
     {
-        public int tileID;
-        public int IsChecked;
+        public int tileX;
+        public int tileY;
 
-        public PreciseTileChecker(int ID)
+        public PreciseTileChecker(int x, int y)
         {
-            tileID = ID;
-            IsChecked = 0;
+            tileX = x;
+            tileY = y;
         }
     }
     
@@ -165,58 +164,77 @@ public class PreciseMap {
         List<List<PreciseTileChecker>> caveRegions = GetRegions(0);
         foreach(List<PreciseTileChecker> cavern in caveRegions)
         {
-            if(cavern.Count < roomSize)
+            //Debug.Log(cavern.Count);
+            if(cavern.Count <= roomSize)
             {
                 foreach(PreciseTileChecker Tile in cavern)
                 {
-                    tiles[Tile.tileID].ClearNeighbors();
-                    tiles[Tile.tileID].AutoTileID = (int)TilePiece.EMPTY;
+                    tiles[col * Tile.tileY + Tile.tileX].ClearNeighbors();
+                    tiles[col * Tile.tileY + Tile.tileX].AutoTileID = (int)TilePiece.EMPTY;
                 }
             }
         }
-        Debug.Log("Finished Dectecting and Removing Regions");
     }
 
     private List<List<PreciseTileChecker>> GetRegions(int TileType)
     {
         List<List<PreciseTileChecker>> caverns = new List<List<PreciseTileChecker>>();
+        int[,] mapFlags = new int[col, row];
         for(var r = 0; r < row; r++)
         {
             for(var c = 0; c < col; c++)
             {
-                if(tiles[col * r + c].AutoTileID >= TileType)
+                if(mapFlags[r, c] == 0 && tiles[col * r + c].AutoTileID > TileType && tiles[col * r + c] != null)
                 {
-                    List<PreciseTileChecker> newCavern = GetRegionTiles(col * r + c);
+                    List<PreciseTileChecker> newCavern = GetRegionTiles(c, r);
                     caverns.Add(newCavern);
+
+                    foreach(PreciseTileChecker tile in newCavern)
+                    {
+                        mapFlags[tile.tileX, tile.tileY] = 1;
+                    }
                 }
             }
         }
-        Debug.Log("Exited For Loop in GetRegions()");
         return caverns;
     }
 
-    private List<PreciseTileChecker> GetRegionTiles(int Tile)
+    private List<PreciseTileChecker> GetRegionTiles(int c, int r)
     {
         List<PreciseTileChecker> caveTiles = new List<PreciseTileChecker>();
+        int[,] mapFlags = new int[col , row];
 
         Queue<PreciseTileChecker> queue = new Queue<PreciseTileChecker>();
-        queue.Enqueue(new PreciseTileChecker(Tile));
-        tiles[Tile].IsChecked = 1;
+        queue.Enqueue(new PreciseTileChecker(c, r));
+        mapFlags[c, r] = 1;
 
         while(queue.Count > 0)
         {
             PreciseTileChecker tile = queue.Dequeue();
             caveTiles.Add(tile);
 
-            foreach(PreciseTile neighbor in tiles[Tile].Neighbors)
+            for(var i = tile.tileX - 1; i <= tile.tileX+1; i++)
             {
-                if(neighbor != null && neighbor.IsChecked == 0 && tiles[neighbor.TileID].AutoTileID >= 0)
+                for(var j = tile.tileY - 1; j <= tile.tileY+1; j++)
                 {
-                    neighbor.IsChecked = 1;
-                    queue.Enqueue(new PreciseTileChecker(neighbor.TileID));
+                    if(i == tile.tileX || j == tile.tileY)
+                    { 
+                        if(InsideMap(i,j) && (j==tile.tileY || i == tile.tileX)){
+                            if(mapFlags[i,j] == 0 && tiles[col*j+i].AutoTileID > 0)
+                            {
+                                mapFlags[i, j] = 1;
+                                queue.Enqueue(new PreciseTileChecker(i, j));
+                            }
+                        }
+                    }
                 }
             }
         }
         return caveTiles;
+    }
+
+    private bool InsideMap(int x, int y)
+    {
+        return x >= 0 && x < row && y >= 0 && y < col;
     }
 }
