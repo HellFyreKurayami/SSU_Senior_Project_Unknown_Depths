@@ -257,24 +257,14 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 114009575042113890, guid: c7c5460d5cd00f043939e37b52526079,
         type: 2}
-      propertyPath: UseSeed
-      value: 1
+      propertyPath: MapWidth
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 114009575042113890, guid: c7c5460d5cd00f043939e37b52526079,
         type: 2}
-      propertyPath: Seed
-      value: IHateProgramming
+      propertyPath: MapHeight
+      value: 50
       objectReference: {fileID: 0}
-    - target: {fileID: 114009575042113890, guid: c7c5460d5cd00f043939e37b52526079,
-        type: 2}
-      propertyPath: roomThreshold
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 114009575042113890, guid: c7c5460d5cd00f043939e37b52526079,
-        type: 2}
-      propertyPath: MapTexture
-      value: 
-      objectReference: {fileID: 2800000, guid: d0dc76b8322da844797d4f6bf0de7f7c, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c7c5460d5cd00f043939e37b52526079, type: 2}
   m_IsPrefabAsset: 0
