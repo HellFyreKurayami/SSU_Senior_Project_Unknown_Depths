@@ -122,30 +122,30 @@ public class PreciseMap {
 
     private void FindNeighbors()
     {
-        for (var r = 0; r < row; r++)
+        for (var x = 0; x < row; x++)
         {
-            for (var c = 0; c < col; c++)
+            for (var y = 0; y < col; y++)
             {
-                var tile = tiles[col * r + c];
+                var tile = tiles[col * x + y];
 
-                if (r < row - 1)
+                if (x < row - 1)
                 {
-                    tile.AddNeighbor(Sides.BOTTOM, tiles[col * (r + 1) + c]);
+                    tile.AddNeighbor(Sides.BOTTOM, tiles[col * (x + 1) + y]);
                 }
 
-                if (c < col - 1)
+                if (y < col - 1)
                 {
-                    tile.AddNeighbor(Sides.RIGHT, tiles[col * r + c + 1]);
+                    tile.AddNeighbor(Sides.RIGHT, tiles[col * x + y + 1]);
                 }
 
-                if (c > 0)
+                if (y > 0)
                 {
-                    tile.AddNeighbor(Sides.LEFT, tiles[col * r + c - 1]);
+                    tile.AddNeighbor(Sides.LEFT, tiles[col * x + y - 1]);
                 }
 
-                if (r > 0)
+                if (x > 0)
                 {
-                    tile.AddNeighbor(Sides.TOP, tiles[col * (r - 1) + c]);
+                    tile.AddNeighbor(Sides.TOP, tiles[col * (x - 1) + y]);
                 }
             }
         }
@@ -156,12 +156,15 @@ public class PreciseMap {
     /// </summary>
 
 
-    class Cavern
+    class Cavern : IComparable<Cavern>
     {
         public List<PreciseTileChecker> tiles;
         public List<PreciseTileChecker> edges;
         public List<Cavern> connectedCaverns;
         public int caveSize;
+
+        public bool isAccessibleFromMainCavern;
+        public bool isMainCavern = false;
 
         public Cavern()
         {
@@ -194,8 +197,28 @@ public class PreciseMap {
             }
         }
 
+        public void SetAccessibleFromMainCavern()
+        {
+            if (!isAccessibleFromMainCavern)
+            {
+                isAccessibleFromMainCavern = true;
+                foreach(Cavern connectedCave in connectedCaverns)
+                {
+                    connectedCave.SetAccessibleFromMainCavern();
+                }
+            }
+        }
+
         public static void ConnectCaves(Cavern caveA, Cavern caveB)
         {
+            if (caveA.isAccessibleFromMainCavern)
+            {
+                caveB.SetAccessibleFromMainCavern();
+            }
+            else if (caveB.isAccessibleFromMainCavern)
+            {
+                caveA.SetAccessibleFromMainCavern();
+            }
             caveA.connectedCaverns.Add(caveB);
             caveB.connectedCaverns.Add(caveA);
         }
@@ -204,10 +227,37 @@ public class PreciseMap {
         {
             return connectedCaverns.Contains(other);
         }
+
+        public int CompareTo(Cavern other)
+        {
+            return other.caveSize.CompareTo(caveSize);
+        }
     }
 
-    private void ConnectCaverns(List<Cavern> Caves)
+    private void ConnectCaverns(List<Cavern> Caves, bool forceAccessibilityFromMain = false)
     {
+        List<Cavern> caveListA = new List<Cavern>();
+        List<Cavern> caveListB = new List<Cavern>();
+
+        if (forceAccessibilityFromMain)
+        {
+            foreach(Cavern cave in Caves)
+            {
+                if (cave.isAccessibleFromMainCavern)
+                {
+                    caveListB.Add(cave);
+                }
+                else
+                {
+                    caveListA.Add(cave);
+                }
+            }
+        }
+        else
+        {
+            caveListA = Caves;
+            caveListB = Caves;
+        }
         int closestDistance = 0;
         PreciseTileChecker bestTileA = new PreciseTileChecker();
         PreciseTileChecker bestTileB = new PreciseTileChecker();
@@ -216,19 +266,22 @@ public class PreciseMap {
 
         bool connectonFound = false;
 
-        foreach(Cavern caveA in Caves)
+        foreach (Cavern caveA in Caves)
         {
-            connectonFound = false;
-            foreach(Cavern caveB in Caves)
+            if (!forceAccessibilityFromMain)
             {
-                if(caveA == caveB)
+                connectonFound = false;
+                if(caveA.connectedCaverns.Count > 0)
                 {
                     continue;
                 }
-                if (caveA.IsConnected(caveB))
+            }
+
+            foreach(Cavern caveB in Caves)
+            {
+                if(caveA == caveB || caveA.IsConnected(caveB))
                 {
-                    connectonFound = false;
-                    break;
+                    continue;
                 }
 
                 for(int tileIndexA = 0; tileIndexA < caveA.edges.Count; tileIndexA++)
@@ -239,7 +292,8 @@ public class PreciseMap {
                         PreciseTileChecker tileB = caveB.edges[tileIndexB];
 
                         int distance = (int)(Mathf.Pow((tileA.tileX - tileB.tileX), 2) + Mathf.Pow((tileA.tileY - tileB.tileY), 2));
-                        if(distance < closestDistance || !connectonFound)
+
+                        if (distance < closestDistance || !connectonFound)
                         {
                             closestDistance = distance;
                             connectonFound = true;
@@ -252,11 +306,15 @@ public class PreciseMap {
                 }
             }
 
-            if (connectonFound)
+            if (connectonFound && !forceAccessibilityFromMain)
             {
-
                 CreatePath(bestCaveA, bestCaveB, bestTileA, bestTileB);
             }
+        }
+
+        if(connectonFound && forceAccessibilityFromMain)
+        {
+            CreatePath(bestCaveA, bestCaveB, bestTileA, bestTileB);
         }
     }
 
@@ -275,7 +333,6 @@ public class PreciseMap {
     /// <summary>
     /// Precise Tile Checker structure and needed methods below
     /// </summary>
-
 
     struct PreciseTileChecker
     {
@@ -311,6 +368,10 @@ public class PreciseMap {
         }
 
         Debug.Log("Going to connect regions now");
+
+        survivingRegions.Sort();
+        survivingRegions[0].isMainCavern = true;
+        survivingRegions[0].isAccessibleFromMainCavern = true;
         ConnectCaverns(survivingRegions);
     }
 
@@ -374,5 +435,53 @@ public class PreciseMap {
     private bool InsideMap(int x, int y)
     {
         return x >= 0 && x < row && y >= 0 && y < col;
+    }
+
+    /// <summary>
+    /// Methods below are used to draw the paths connecting the caverns across the map
+    /// </summary>
+
+    private void DrawPassage(PreciseTileChecker t, int r)
+    {
+        for(var x = -r; x <= r; x++)
+        {
+            for(var y = -r; y <= r; y++)
+            {
+                if(x*x + y*y <= r * r)
+                {
+                    int drawX = t.tileX + x;
+                    int drawY = t.tileY + y;
+                    if(InsideMap(drawX, drawY))
+                    {
+                        PreciseTile tile = tiles[col * drawX + drawY];
+
+                        if (x < row - 1)
+                        {
+                            tile.AddNeighbor(Sides.BOTTOM, tiles[col * (x + 1) + y]);
+                        }
+
+                        if (y < col - 1)
+                        {
+                            tile.AddNeighbor(Sides.RIGHT, tiles[col * x + y + 1]);
+                        }
+
+                        if (y > 0)
+                        {
+                            tile.AddNeighbor(Sides.LEFT, tiles[col * x + y - 1]);
+                        }
+
+                        if (x > 0)
+                        {
+                            tile.AddNeighbor(Sides.TOP, tiles[col * (x - 1) + y]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void GetPassageTiles(PreciseTileChecker from, PreciseTileChecker to)
+    {
+        List<PreciseTileChecker> line = new List<PreciseTileChecker>();
     }
 }

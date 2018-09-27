@@ -53,6 +53,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MapWidth: 50
   MapHeight: 50
+  UseSeed: 1
   Seed: IHatePrograming
   MapContainer: {fileID: 1585396838307022}
   TilePrefab: {fileID: 1473856163004920, guid: 96f40d36fcfe2a2439cb32953f65dc98, type: 2}
