@@ -150,7 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 149a44381ab59404c931c676a66a4265, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nativeRes: {x: 640, y: 576}
+  nativeRes: {x: 160, y: 144}
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0
@@ -215,7 +215,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a817641af4458b40be6c6889a8b336e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 6
+  speed: 4
 --- !u!1001 &2039984143
 Prefab:
   m_ObjectHideFlags: 0
@@ -255,26 +255,6 @@ Prefab:
       propertyPath: m_RootOrder
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 114009575042113890, guid: c7c5460d5cd00f043939e37b52526079,
-        type: 2}
-      propertyPath: UseSeed
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114009575042113890, guid: c7c5460d5cd00f043939e37b52526079,
-        type: 2}
-      propertyPath: Seed
-      value: IHateProgramming
-      objectReference: {fileID: 0}
-    - target: {fileID: 114009575042113890, guid: c7c5460d5cd00f043939e37b52526079,
-        type: 2}
-      propertyPath: roomThreshold
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 114009575042113890, guid: c7c5460d5cd00f043939e37b52526079,
-        type: 2}
-      propertyPath: MapTexture
-      value: 
-      objectReference: {fileID: 2800000, guid: d0dc76b8322da844797d4f6bf0de7f7c, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c7c5460d5cd00f043939e37b52526079, type: 2}
   m_IsPrefabAsset: 0

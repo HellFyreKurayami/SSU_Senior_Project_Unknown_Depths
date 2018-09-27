@@ -4,14 +4,18 @@ using System;
 using System.Linq;
 using UnityEngine;
 
+/// <summary>
+/// 
 ///Precise Map Class
-
 ///This class contains code references to both a tutorial located on
 ///the Unity site, and a tutorial found on LinkedIn Learning/Lynda by
 ///Sebstian Lague and Jesse Freeman Respectively
-
+///
 ///https://unity3d.com/learn/tutorials/projects/procedural-cave-generation-tutorial/
 ///https://www.linkedin.com/learning/unity-5-2d-random-map-generation
+///
+/// </summary>
+
 
 public enum TilePiece
 {
@@ -49,10 +53,10 @@ public class PreciseMap {
 
     public void CreateMap(int width, int height)
     {
-        col = width;
-        row = height;
+        row = width;// Will have variable names of r, x, i / Need to fix to be more uniform later
+        col = height;// Will have variable names of c, y, j / Need to fix to be more uniform later
 
-        tiles = new PreciseTile[col * row];
+        tiles = new PreciseTile[row * col];
 
         CreateTiles();
     }
@@ -147,6 +151,132 @@ public class PreciseMap {
         }
     }
 
+    /// <summary>
+    /// Cavern class and respective methods below
+    /// </summary>
+
+
+    class Cavern
+    {
+        public List<PreciseTileChecker> tiles;
+        public List<PreciseTileChecker> edges;
+        public List<Cavern> connectedCaverns;
+        public int caveSize;
+
+        public Cavern()
+        {
+            //Literally does nothing, Congrats this is a useless constructor
+        }
+
+        public Cavern(List<PreciseTileChecker> caveTiles, PreciseTile[] map, int mapRow, int mapCol)
+        {
+            //This is the real constructor
+            tiles = caveTiles; //List of tiles in the cavern we are checking
+            caveSize = tiles.Count; //How many tiles we have to check
+            connectedCaverns = new List<Cavern>(); //Contains rooms this object is connected to
+
+            edges = new List<PreciseTileChecker>();
+            foreach (PreciseTileChecker tile in tiles)
+            {
+                for (var x = tile.tileX - 1; x <= tile.tileX + 1; x++)
+                {
+                    for (var y = tile.tileY - 1; y <= tile.tileY + 1; y++)
+                    {
+                        if (x == tile.tileX || y == tile.tileY)
+                        {
+                            if (map[mapCol * x + y].AutoTileID >= 0)
+                            {
+                                edges.Add(tile);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public static void ConnectCaves(Cavern caveA, Cavern caveB)
+        {
+            caveA.connectedCaverns.Add(caveB);
+            caveB.connectedCaverns.Add(caveA);
+        }
+
+        public bool IsConnected(Cavern other)
+        {
+            return connectedCaverns.Contains(other);
+        }
+    }
+
+    private void ConnectCaverns(List<Cavern> Caves)
+    {
+        int closestDistance = 0;
+        PreciseTileChecker bestTileA = new PreciseTileChecker();
+        PreciseTileChecker bestTileB = new PreciseTileChecker();
+        Cavern bestCaveA = new Cavern();
+        Cavern bestCaveB = new Cavern();
+
+        bool connectonFound = false;
+
+        foreach(Cavern caveA in Caves)
+        {
+            connectonFound = false;
+            foreach(Cavern caveB in Caves)
+            {
+                if(caveA == caveB)
+                {
+                    continue;
+                }
+                if (caveA.IsConnected(caveB))
+                {
+                    connectonFound = false;
+                    break;
+                }
+
+                for(int tileIndexA = 0; tileIndexA < caveA.edges.Count; tileIndexA++)
+                {
+                    for(int tileIndexB = 0; tileIndexB < caveB.edges.Count; tileIndexB++)
+                    {
+                        PreciseTileChecker tileA = caveA.edges[tileIndexA];
+                        PreciseTileChecker tileB = caveB.edges[tileIndexB];
+
+                        int distance = (int)(Mathf.Pow((tileA.tileX - tileB.tileX), 2) + Mathf.Pow((tileA.tileY - tileB.tileY), 2));
+                        if(distance < closestDistance || !connectonFound)
+                        {
+                            closestDistance = distance;
+                            connectonFound = true;
+                            bestTileA = tileA;
+                            bestTileB = tileB;
+                            bestCaveA = caveA;
+                            bestCaveB = caveB;
+                        }
+                    }
+                }
+            }
+
+            if (connectonFound)
+            {
+
+                CreatePath(bestCaveA, bestCaveB, bestTileA, bestTileB);
+            }
+        }
+    }
+
+    private void CreatePath(Cavern caveA, Cavern caveB, PreciseTileChecker tileA, PreciseTileChecker tileB)
+    {
+        Cavern.ConnectCaves(caveA, caveB);
+        Debug.Log("Tile A ID:" + tiles[col * tileA.tileX + tileA.tileY].TileID + " Tile B ID:" + tiles[col * tileB.tileX + tileB.tileY].TileID);
+        //Debug.DrawLine(DisplayLine(tileA), DisplayLine(tileB), Color.green, 100);
+    }
+
+    Vector3 DisplayLine(PreciseTileChecker tile)
+    {
+        return new Vector3((tile.tileX * 16 + .5f), (-tile.tileY * 16 + .5f), 2);
+    }
+
+    /// <summary>
+    /// Precise Tile Checker structure and needed methods below
+    /// </summary>
+
+
     struct PreciseTileChecker
     {
         public int tileX;
@@ -158,35 +288,43 @@ public class PreciseMap {
             tileY = y;
         }
     }
-    
+
     private void DetectRegions(int roomSize)
     {
-        List<List<PreciseTileChecker>> caveRegions = GetRegions(0);
-        foreach(List<PreciseTileChecker> cavern in caveRegions)
+        List<List<PreciseTileChecker>> caveRegions = GetRegions();
+        List<Cavern> survivingRegions = new List<Cavern>();
+        foreach (List<PreciseTileChecker> cavern in caveRegions)
         {
             //Debug.Log(cavern.Count);
             if(cavern.Count <= roomSize)
             {
                 foreach(PreciseTileChecker Tile in cavern)
                 {
-                    tiles[col * Tile.tileY + Tile.tileX].ClearNeighbors();
-                    tiles[col * Tile.tileY + Tile.tileX].AutoTileID = (int)TilePiece.EMPTY;
+                    tiles[col * Tile.tileX + Tile.tileY].ClearNeighbors();
+                    tiles[col * Tile.tileX + Tile.tileY].AutoTileID = (int)TilePiece.EMPTY;
                 }
             }
+            else
+            {
+                survivingRegions.Add(new Cavern(cavern, tiles, row, col));
+            }
         }
+
+        Debug.Log("Going to connect regions now");
+        ConnectCaverns(survivingRegions);
     }
 
-    private List<List<PreciseTileChecker>> GetRegions(int TileType)
+    private List<List<PreciseTileChecker>> GetRegions()
     {
         List<List<PreciseTileChecker>> caverns = new List<List<PreciseTileChecker>>();
-        int[,] mapFlags = new int[col, row];
+        int[,] mapFlags = new int[row, col];
         for(var r = 0; r < row; r++)
         {
             for(var c = 0; c < col; c++)
             {
-                if(mapFlags[r, c] == 0 && tiles[col * r + c].AutoTileID > TileType && tiles[col * r + c] != null)
+                if(mapFlags[r, c] == 0 && tiles[col * r + c].AutoTileID >= (int)TileType.EMPTY && tiles[col * r + c] != null)
                 {
-                    List<PreciseTileChecker> newCavern = GetRegionTiles(c, r);
+                    List<PreciseTileChecker> newCavern = GetRegionTiles(r, c);
                     caverns.Add(newCavern);
 
                     foreach(PreciseTileChecker tile in newCavern)
@@ -199,31 +337,31 @@ public class PreciseMap {
         return caverns;
     }
 
-    private List<PreciseTileChecker> GetRegionTiles(int c, int r)
+    private List<PreciseTileChecker> GetRegionTiles(int r, int c)
     {
         List<PreciseTileChecker> caveTiles = new List<PreciseTileChecker>();
-        int[,] mapFlags = new int[col , row];
+        int[,] mapFlags = new int[row , col];
 
         Queue<PreciseTileChecker> queue = new Queue<PreciseTileChecker>();
-        queue.Enqueue(new PreciseTileChecker(c, r));
-        mapFlags[c, r] = 1;
-
-        while(queue.Count > 0)
+        queue.Enqueue(new PreciseTileChecker(r, c));
+        while (queue.Count > 0)
         {
             PreciseTileChecker tile = queue.Dequeue();
-            caveTiles.Add(tile);
-
-            for(var i = tile.tileX - 1; i <= tile.tileX+1; i++)
+            if(tiles[col* r + c].AutoTileID > (int)TilePiece.EMPTY && tiles[col * r + c] != null)
             {
-                for(var j = tile.tileY - 1; j <= tile.tileY+1; j++)
+                caveTiles.Add(tile);
+                mapFlags[r, c] = 1;
+                for (var x = tile.tileX - 1; x <= tile.tileX + 1; x++)
                 {
-                    if(i == tile.tileX || j == tile.tileY)
-                    { 
-                        if(InsideMap(i,j) && (j==tile.tileY || i == tile.tileX)){
-                            if(mapFlags[i,j] == 0 && tiles[col*j+i].AutoTileID > 0)
+                    for (var y = tile.tileY - 1; y <= tile.tileY + 1; y++)
+                    {
+
+                        if (InsideMap(x, y) && (y == tile.tileY || x == tile.tileX))
+                        {
+                            if (mapFlags[x, y] == 0 && tiles[col * x + y].AutoTileID > -1)
                             {
-                                mapFlags[i, j] = 1;
-                                queue.Enqueue(new PreciseTileChecker(i, j));
+                                mapFlags[x, y] = 1;
+                                queue.Enqueue(new PreciseTileChecker(x, y));
                             }
                         }
                     }

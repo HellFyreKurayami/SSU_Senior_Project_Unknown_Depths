@@ -19,7 +19,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4032152498892250}
-  - component: {fileID: 114009575042113890}
+  - component: {fileID: 114683034952627352}
   m_Layer: 0
   m_Name: Precise Map Tester
   m_TagString: Untagged
@@ -34,13 +34,13 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1585396838307022}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 150.36372, y: -152.78868, z: 3.3125}
+  m_LocalPosition: {x: 0, y: 0, z: 3.3125}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114009575042113890
+--- !u!114 &114683034952627352
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -53,11 +53,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MapWidth: 50
   MapHeight: 50
-  UseSeed: 0
-  Seed: 
+  Seed: IHatePrograming
   MapContainer: {fileID: 1585396838307022}
   TilePrefab: {fileID: 1473856163004920, guid: 96f40d36fcfe2a2439cb32953f65dc98, type: 2}
   TileSize: {x: 16, y: 16}
-  MapTexture: {fileID: 2800000, guid: 02307c5eacea591419e6c3f05529a152, type: 3}
-  caveErosion: 34
-  roomThreshold: 2
+  MapTexture: {fileID: 2800000, guid: d0dc76b8322da844797d4f6bf0de7f7c, type: 3}
+  caveErosion: 46
+  roomThreshold: 3
+  treasureChests: 1

@@ -18,7 +18,7 @@ public class MapMaker : MonoBehaviour {
     public int MapHeight = 20;
 
     [Space]
-    [Header("Map Seed *Optional")]
+    [Header("Map Seed **Optional**")]
     public bool UseSeed = false;
     public string Seed = "";
 
@@ -33,11 +33,16 @@ public class MapMaker : MonoBehaviour {
     public Texture2D MapTexture;
 
     [Space]
-    [Header("Populate Map")]
-    [Range(20, 70)]
+    [Header("Create Map")]
+    [Range(10, 50)]
     public int caveErosion = 25;
     [Range(0, 15)]
     public int roomThreshold = 6;
+
+    [Space]
+    [Header("Populate Map")]
+    [Range(0, 20)]
+    public int treasureChests = 1;
 
     public PreciseMap Map;
 
