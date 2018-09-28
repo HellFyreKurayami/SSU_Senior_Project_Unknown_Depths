@@ -44,11 +44,11 @@ public class MapMaker : MonoBehaviour {
     [Range(0, 20)]
     public int treasureChests = 1;
 
-    public PreciseMap Map;
+    public PreciseMap_Old Map;
 
     // Use this for initialization
     void Start () {
-        Map = new PreciseMap();
+        Map = new PreciseMap_Old();
 	}
 	
     public void Create()

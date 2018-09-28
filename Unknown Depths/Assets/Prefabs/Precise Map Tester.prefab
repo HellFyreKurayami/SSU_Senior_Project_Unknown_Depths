@@ -51,8 +51,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a13cdbd52c50b3740993eb00eeac3cd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MapWidth: 50
-  MapHeight: 50
+  MapWidth: 20
+  MapHeight: 20
   UseSeed: 1
   Seed: IHatePrograming
   MapContainer: {fileID: 1585396838307022}
