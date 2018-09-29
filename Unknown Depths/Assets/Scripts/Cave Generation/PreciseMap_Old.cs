@@ -31,7 +31,7 @@ public enum TilePiece_OLD
 
 public class PreciseMap_Old {
 
-    public PreciseTile[] tiles; // Array of Tiles for the map
+    public PreciseTile[] mapTiles; // Array of Tiles for the map
     public int col; //Map Size Columns/Length
     public int row; //Map Size Rows/Height
 
@@ -39,7 +39,7 @@ public class PreciseMap_Old {
     {
         get
         {
-            return tiles.Where(t => t.AutoTileID < (int)TilePiece_OLD.GRASS).ToArray();
+            return mapTiles.Where(t => t.AutoTileID < (int)TilePiece_OLD.GRASS).ToArray();
         }
     }
 
@@ -47,7 +47,7 @@ public class PreciseMap_Old {
     {
         get
         {
-            return tiles.Where(t => t.AutoTileID == (int)TilePiece_OLD.GRASS).ToArray();
+            return mapTiles.Where(t => t.AutoTileID == (int)TilePiece_OLD.GRASS).ToArray();
         }
     }
 
@@ -56,19 +56,19 @@ public class PreciseMap_Old {
         row = width;// Will have variable names of r, x, i / Need to fix to be more uniform later
         col = height;// Will have variable names of c, y, j / Need to fix to be more uniform later
 
-        tiles = new PreciseTile[row * col];
+        mapTiles = new PreciseTile[row * col];
 
         CreateTiles();
     }
 
     public void CreateTiles()
     {
-        var Total = tiles.Length;
+        var Total = mapTiles.Length;
         for(var i = 0; i < Total; i++)
         {
             var tile = new PreciseTile();
             tile.TileID = i;
-            tiles[i] = tile;
+            mapTiles[i] = tile;
         }
 
         FindNeighbors();
@@ -88,7 +88,7 @@ public class PreciseMap_Old {
 
         System.Random psuRand = new System.Random(seed.GetHashCode());
 
-        var total = tiles.Length;
+        var total = mapTiles.Length;
         var MaxCol = col;
         var MaxRow = row;
         var Column = 0;
@@ -99,15 +99,16 @@ public class PreciseMap_Old {
             Column = i % MaxCol;
             if(Row == 0 || Row == MaxRow - 1 || Column == 0 || Column == MaxCol - 1)
             {
-                tiles[i].ClearNeighbors();
-                tiles[i].AutoTileID = (int)TilePiece_OLD.EMPTY;
+                Debug.Log(Column);
+                mapTiles[i].ClearNeighbors();
+                mapTiles[i].AutoTileID = (int)TilePiece_OLD.EMPTY;
             }
             else
             {
                 if(psuRand.Next(0,100) < caveErode)
                 {
-                    tiles[i].ClearNeighbors();
-                    tiles[i].AutoTileID = (int)TilePiece_OLD.EMPTY;
+                    mapTiles[i].ClearNeighbors();
+                    mapTiles[i].AutoTileID = (int)TilePiece_OLD.EMPTY;
                 }
             }
 
@@ -126,26 +127,26 @@ public class PreciseMap_Old {
         {
             for (var y = 0; y < col; y++)
             {
-                var tile = tiles[col * x + y];
+                var tile = mapTiles[col * x + y];
 
                 if (x < row - 1)
                 {
-                    tile.AddNeighbor(Sides.BOTTOM, tiles[col * (x + 1) + y]);
+                    tile.AddNeighbor(Sides.BOTTOM, mapTiles[col * (x + 1) + y]);
                 }
 
                 if (y < col - 1)
                 {
-                    tile.AddNeighbor(Sides.RIGHT, tiles[col * x + y + 1]);
+                    tile.AddNeighbor(Sides.RIGHT, mapTiles[col * x + y + 1]);
                 }
 
                 if (y > 0)
                 {
-                    tile.AddNeighbor(Sides.LEFT, tiles[col * x + y - 1]);
+                    tile.AddNeighbor(Sides.LEFT, mapTiles[col * x + y - 1]);
                 }
 
                 if (x > 0)
                 {
-                    tile.AddNeighbor(Sides.TOP, tiles[col * (x - 1) + y]);
+                    tile.AddNeighbor(Sides.TOP, mapTiles[col * (x - 1) + y]);
                 }
             }
         }
@@ -266,7 +267,7 @@ public class PreciseMap_Old {
 
         bool connectonFound = false;
 
-        foreach (Cavern caveA in Caves)
+        foreach (Cavern caveA in caveListA)
         {
             if (!forceAccessibilityFromMain)
             {
@@ -277,7 +278,7 @@ public class PreciseMap_Old {
                 }
             }
 
-            foreach(Cavern caveB in Caves)
+            foreach(Cavern caveB in caveListB)
             {
                 if(caveA == caveB || caveA.IsConnected(caveB))
                 {
@@ -329,7 +330,7 @@ public class PreciseMap_Old {
     private void CreatePath(Cavern caveA, Cavern caveB, PreciseTileChecker tileA, PreciseTileChecker tileB)
     {
         Cavern.ConnectCaves(caveA, caveB);
-        Debug.Log("Tile A ID:" + tiles[col * tileA.tileX + tileA.tileY].TileID + " Tile B ID:" + tiles[col * tileB.tileX + tileB.tileY].TileID);
+        //Debug.Log("Tile A ID:" + mapTiles[col * tileA.tileX + tileA.tileY].TileID + " Tile B ID:" + mapTiles[col * tileB.tileX + tileB.tileY].TileID);
         //Debug.DrawLine(DisplayLine(tileA), DisplayLine(tileB), Color.green, 100);
         /*List<PreciseTileChecker> line = GetPassageTiles(tileA, tileB);
         foreach (PreciseTileChecker t in line)
@@ -370,13 +371,13 @@ public class PreciseMap_Old {
             {
                 foreach(PreciseTileChecker Tile in cavern)
                 {
-                    tiles[col * Tile.tileX + Tile.tileY].ClearNeighbors();
-                    tiles[col * Tile.tileX + Tile.tileY].AutoTileID = (int)TilePiece_OLD.EMPTY;
+                    mapTiles[col * Tile.tileX + Tile.tileY].ClearNeighbors();
+                    mapTiles[col * Tile.tileX + Tile.tileY].AutoTileID = (int)TilePiece_OLD.EMPTY;
                 }
             }
             else
             {
-                survivingRegions.Add(new Cavern(cavern, tiles, row, col));
+                survivingRegions.Add(new Cavern(cavern, mapTiles, row, col));
             }
         }
 
@@ -396,7 +397,7 @@ public class PreciseMap_Old {
         {
             for(var c = 0; c < col; c++)
             {
-                if(mapFlags[r, c] == 0 && tiles[col * r + c].AutoTileID >= (int)TileType.EMPTY && tiles[col * r + c] != null)
+                if(mapFlags[r, c] == 0 && mapTiles[col * r + c].AutoTileID >= (int)TileType.EMPTY && mapTiles[col * r + c] != null)
                 {
                     List<PreciseTileChecker> newCavern = GetRegionTiles(r, c);
                     caverns.Add(newCavern);
@@ -421,7 +422,7 @@ public class PreciseMap_Old {
         while (queue.Count > 0)
         {
             PreciseTileChecker tile = queue.Dequeue();
-            if(tiles[col* r + c].AutoTileID > (int)TilePiece_OLD.EMPTY && tiles[col * r + c] != null)
+            if(mapTiles[col* r + c].AutoTileID > (int)TilePiece_OLD.EMPTY && mapTiles[col * r + c] != null)
             {
                 caveTiles.Add(tile);
                 mapFlags[r, c] = 1;
@@ -432,7 +433,7 @@ public class PreciseMap_Old {
 
                         if (InsideMap(x, y) && (y == tile.tileY || x == tile.tileX))
                         {
-                            if (mapFlags[x, y] == 0 && tiles[col * x + y].AutoTileID > -1)
+                            if (mapFlags[x, y] == 0 && mapTiles[col * x + y].AutoTileID > -1)
                             {
                                 mapFlags[x, y] = 1;
                                 queue.Enqueue(new PreciseTileChecker(x, y));
@@ -466,26 +467,26 @@ public class PreciseMap_Old {
                     int drawY = t.tileY + y;
                     if(InsideMap(drawX, drawY))
                     {
-                        PreciseTile tile = tiles[col * drawX + drawY];
+                        PreciseTile tile = mapTiles[col * drawX + drawY];
 
                         if (drawX < row - 1)
                         {
-                            tile.AddNeighbor(Sides.BOTTOM, tiles[col * (drawX + 1) + drawY]);
+                            tile.AddNeighbor(Sides.BOTTOM, mapTiles[col * (drawX + 1) + drawY]);
                         }
 
                         if (drawY < col - 1)
                         {
-                            tile.AddNeighbor(Sides.RIGHT, tiles[col * drawX + drawY + 1]);
+                            tile.AddNeighbor(Sides.RIGHT, mapTiles[col * drawX + drawY + 1]);
                         }
 
                         if (drawY > 0)
                         {
-                            tile.AddNeighbor(Sides.LEFT, tiles[col * drawX + drawY - 1]);
+                            tile.AddNeighbor(Sides.LEFT, mapTiles[col * drawX + drawY - 1]);
                         }
 
                         if (drawX > 0)
                         {
-                            tile.AddNeighbor(Sides.TOP, tiles[col * (drawX - 1) + drawY]);
+                            tile.AddNeighbor(Sides.TOP, mapTiles[col * (drawX - 1) + drawY]);
                         }
                     }
                 }

@@ -44,11 +44,13 @@ public class MapMaker : MonoBehaviour {
     [Range(0, 20)]
     public int treasureChests = 1;
 
-    public PreciseMap_Old Map;
+    public PreciseMap Map;
+    //public PreciseMap_Old Map;
 
     // Use this for initialization
     void Start () {
-        Map = new PreciseMap_Old();
+        Map = new PreciseMap();
+        //Map = new PreciseMap_Old();
 	}
 	
     public void Create()
@@ -64,7 +66,7 @@ public class MapMaker : MonoBehaviour {
         ClearMap();
         Sprite[] mSprites = Resources.LoadAll<Sprite>(MapTexture.name);
 
-        var Total = Map.tiles.Length;
+        var Total = Map.mapTiles.Length;
         var MaxColumns = Map.col;
         var Col = 0;
         var Row = 0;
@@ -81,7 +83,7 @@ public class MapMaker : MonoBehaviour {
             go.transform.SetParent(MapContainer.transform);
             go.transform.position = new Vector3(tNewX, tNewY, 0);
 
-            var tile = Map.tiles[i];
+            var tile = Map.mapTiles[i];
             var spriteID = tile.AutoTileID;
 
             if (spriteID >= 0)
