@@ -443,13 +443,17 @@ public class PreciseMap
     private void CreatePath(Cavern caveA, Cavern caveB, PreciseTileChecker tileA, PreciseTileChecker tileB)
     {
         Cavern.ConnectCaves(caveA, caveB);
-        Debug.Log("Tile A ID:" + mapTiles[col * tileA.tileX + tileA.tileY].TileID + " Tile B ID:" + mapTiles[col * tileB.tileX + tileB.tileY].TileID);
+        //Debug.Log("Tile A ID:" + mapTiles[col * tileA.tileX + tileA.tileY].TileID + " Tile B ID:" + mapTiles[col * tileB.tileX + tileB.tileY].TileID);
+        //Debug.Log("Tile A X:" + tileA.tileX + " Tile A Y:" + tileA.tileY + " Tile B X:" + tileB.tileX + " Tile B Y:" + tileB.tileY);
         //Debug.DrawLine(DisplayLine(tileA), DisplayLine(tileB), Color.green, 100);
+        //Debug.Log("Begin Line");
         List<PreciseTileChecker> line = GetPassageTiles(tileA, tileB);
         foreach (PreciseTileChecker t in line)
         {
+            //Debug.Log("Tile X: " + t.tileX + " Tile Y: " + t.tileY + " Tile ID: " + (col * t.tileX + t.tileY));
             DrawPassage(t, 1);
         }
+        //Debug.Log("End Line");
     }
 
     private void DrawPassage(PreciseTileChecker t, int r)
@@ -480,8 +484,8 @@ public class PreciseMap
         int x = from.tileX;
         int y = from.tileY;
 
-        int dx = to.tileX;
-        int dy = to.tileY;
+        int dx = to.tileX - from.tileX;
+        int dy = to.tileY - from.tileY;
 
         bool inverted = false;
         int step = Math.Sign(dx);
@@ -528,7 +532,11 @@ public class PreciseMap
 
                 gradientAcc -= longest;
             }
+
+            Debug.Log("X = " + x + " Y = " + y);
         }
+
+        // Add a debug statement here to check to see what line math is returning.
 
         return line;
     }
