@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+///<summary>
 ///Map Maker Class
-
+///
 ///This class contains code references to both a tutorial located on
 ///the Unity site, and a tutorial found on LinkedIn Learning/Lynda by
 ///Sebstian Lague and Jesse Freeman Respectively
-
+///
 ///https://unity3d.com/learn/tutorials/projects/procedural-cave-generation-tutorial/
-///https://www.linkedin.com/learning/unity-5-2d-random-map-generation
+///https://www.linkedin.com/learning/unity-5-2d-random-map-generation 
+/// </summary>
 
 public class MapMaker : MonoBehaviour {
 
@@ -33,32 +35,47 @@ public class MapMaker : MonoBehaviour {
     public Texture2D MapTexture;
 
     [Space]
+    [Header("Player")]
+    public GameObject playerPrefab;
+    public GameObject player;
+
+    [Space]
     [Header("Create Map")]
-    [Range(10, 50)]
+    [Range(20, 50)]
     public int caveErosion = 25;
     [Range(0, 15)]
     public int roomThreshold = 6;
 
     [Space]
     [Header("Populate Map")]
-    [Range(0, 20)]
+    [Range(0, 10)]
     public int treasureChests = 1;
 
     public PreciseMap Map;
-    //public PreciseMap_Old Map;
+
+    private int tempX;
+    private int tempY;
 
     // Use this for initialization
     void Start () {
         Map = new PreciseMap();
-        //Map = new PreciseMap_Old();
-	}
+        Create();
+        StartCoroutine(AddPlayer());
+    }
+
+    IEnumerator AddPlayer()
+    {
+        yield return new WaitForEndOfFrame();
+        createPlayer();
+    }
 	
     public void Create()
     {
         Map.CreateMap(MapWidth, MapHeight);
         //Debug.Log("Cave Created");
-        Map.CreateCave(UseSeed, Seed, caveErosion, roomThreshold);
+        Map.CreateCave(UseSeed, Seed, caveErosion, roomThreshold, treasureChests);
         CreateGrid();
+        CenterMap(Map.caveEntranceTile.TileID);
     }
 
     void CreateGrid()
@@ -99,6 +116,18 @@ public class MapMaker : MonoBehaviour {
         }
     }
 
+    public void createPlayer()
+    {
+        player = Instantiate(playerPrefab);
+        player.name = "Player";
+        player.transform.SetParent(MapContainer.transform);
+
+        var controller = player.GetComponent<MapMovement>();
+        controller.map = Map;
+        controller.tileSize = TileSize;
+        controller.MoveTo(Map.caveEntranceTile.TileID);
+    }
+
     void ClearMap()
     {
         var children = MapContainer.transform.GetComponentsInChildren<Transform>();
@@ -106,5 +135,17 @@ public class MapMaker : MonoBehaviour {
         {
             Destroy(children[i].gameObject);
         }
+    }
+
+    void CenterMap(int index)
+    {
+        var camPos = Camera.main.transform.position;
+        var width = Map.row; //May need to change to Map.row
+
+        PositionUtil.CalcPosition(index, width, out tempX, out tempY);
+
+        camPos.x = tempX * TileSize.x;
+        camPos.y = -(tempY * TileSize.y);
+        Camera.main.transform.position = camPos;
     }
 }

@@ -150,7 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 149a44381ab59404c931c676a66a4265, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nativeRes: {x: 160, y: 144}
+  nativeRes: {x: 320, y: 288}
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0

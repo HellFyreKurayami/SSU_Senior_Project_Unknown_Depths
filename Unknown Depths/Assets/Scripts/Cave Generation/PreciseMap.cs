@@ -40,7 +40,7 @@ public class PreciseMap
     {
         get
         {
-            return mapTiles.Where(t => t.AutoTileID < (int)TilePiece_OLD.GRASS).ToArray();
+            return mapTiles.Where(t => t.AutoTileID < (int)TilePiece.GRASS).ToArray();
         }
     }
 
@@ -48,7 +48,23 @@ public class PreciseMap
     {
         get
         {
-            return mapTiles.Where(t => t.AutoTileID == (int)TilePiece_OLD.GRASS).ToArray();
+            return mapTiles.Where(t => t.AutoTileID == (int)TilePiece.GRASS).ToArray();
+        }
+    }
+
+    public PreciseTile caveEntranceTile
+    {
+        get
+        {
+            return mapTiles.FirstOrDefault(t => t.AutoTileID == (int)TilePiece.MONSTER);
+        }
+    }
+
+    public PreciseTile caveExitTile
+    {
+        get
+        {
+            return mapTiles.LastOrDefault(t => t.AutoTileID == (int)TilePiece.MONSTER);
         }
     }
 
@@ -86,28 +102,28 @@ public class PreciseMap
 
                 if (x < row - 1)
                 {
-                    tile.AddNeighbor(Sides.BOTTOM, mapTiles[col * (x + 1) + y]);
+                    tile.AddNeighbor(TileSides.BOTTOM, mapTiles[col * (x + 1) + y]);
                 }
 
                 if (y < col - 1)
                 {
-                    tile.AddNeighbor(Sides.RIGHT, mapTiles[col * x + y + 1]);
+                    tile.AddNeighbor(TileSides.RIGHT, mapTiles[col * x + y + 1]);
                 }
 
                 if (y > 0)
                 {
-                    tile.AddNeighbor(Sides.LEFT, mapTiles[col * x + y - 1]);
+                    tile.AddNeighbor(TileSides.LEFT, mapTiles[col * x + y - 1]);
                 }
 
                 if (x > 0)
                 {
-                    tile.AddNeighbor(Sides.TOP, mapTiles[col * (x - 1) + y]);
+                    tile.AddNeighbor(TileSides.TOP, mapTiles[col * (x - 1) + y]);
                 }
             }
         }
     }
 
-    public void CreateCave(bool useSeed, string newSeed, int caveErode, int roomThresh)
+    public void CreateCave(bool useSeed, string newSeed, int caveErode, int roomThresh, int chests)
     {
         var seed = "";
         if (useSeed)
@@ -121,45 +137,17 @@ public class PreciseMap
 
         System.Random psuRand = new System.Random(seed.GetHashCode());
 
-        /*var total = mapTiles.Length;
-        var MaxCol = col;
-        var MaxRow = row;
-        var Column = 0;
-        var Row = 0;
-
-        for (var i = 0; i < total; i++)
-        {
-            Column = i % MaxCol;
-            if (Row == 0 || Row == MaxRow - 1 || Column == 0 || Column == MaxCol - 1)
-            {
-                mapLayout[Row, Column] = 0;
-            }
-            else
-            {
-                mapLayout[Row, Column] = (psuRand.Next(0, 100) < caveErode) ? 0 : 1;
-            }
-
-            if (Column == (MaxCol - 1))
-            {
-                Row++;
-            }
-        }*/
-
         for (var x = 0; x < row; x++)
         {
             for (var y = 0; y < col; y++)
             {
-                mapLayout[x, y] = 1;
                 if (x == 0 || x == row - 1 || y == 0 || y == col - 1)
                 {
                     mapLayout[x, y] = 0;
                 }
                 else
                 {
-                    if (psuRand.Next(0, 100) < caveErode)
-                    {
-                        mapLayout[x, y] = 0;
-                    }
+                    mapLayout[x, y] = (psuRand.Next(0, 100) < caveErode) ? 0 : 1;
                 }
             }
         }
@@ -177,29 +165,65 @@ public class PreciseMap
                 }
             }
         }
+        addItems(2, chests);
+    }
+
+    private void addItems(int doors, int chests)
+    {
+        List<PreciseTileChecker> renderedTiles = new List<PreciseTileChecker>();
+        for(var x = 0; x < row; x++)
+        {
+            for (var y = 0; y < col; y++)
+            {
+                if(mapTiles[col * x + y].AutoTileID > 0)
+                {
+                    renderedTiles.Add(new PreciseTileChecker(x, y));
+                }
+            }
+        }
+        
+        for(var d = 0; d < doors; d++)
+        {
+            PreciseTileChecker tile = renderedTiles[UnityEngine.Random.Range(0, renderedTiles.Count)];
+            mapTiles[col * tile.tileX + tile.tileY].AutoTileID = (int)TilePiece.MONSTER;
+            renderedTiles.Remove(tile);
+        }
+
+        for(var c = 0; c < chests; c++)
+        {
+            PreciseTileChecker tile = renderedTiles[UnityEngine.Random.Range(0, renderedTiles.Count)];
+            mapTiles[col * tile.tileX + tile.tileY].AutoTileID = (int)TilePiece.CASTLE;
+            renderedTiles.Remove(tile);
+        }
     }
 
     private void DetectRegions(int caveSize)
     {
-        List<List<PreciseTileChecker>> caveRegions = GetRegions();
-        List<Cavern> survivingRegions = new List<Cavern>();
-        foreach (List<PreciseTileChecker> cavern in caveRegions)
+        int previousRoomCount = 0;
+        while(previousRoomCount != 1)
         {
-            //Debug.Log("Cavern Number: "+id+" Cavern Size: "+cavern.Count+" Parent Tile: "+(col*cavern[0].tileX+cavern[0].tileY));
-            if (cavern.Count <= caveSize+1)
+            //Debug.Log("Passing through");
+            List<List<PreciseTileChecker>> caveRegions = GetRegions();
+            List<Cavern> survivingRegions = new List<Cavern>();
+            foreach (List<PreciseTileChecker> cavern in caveRegions)
             {
-                foreach (PreciseTileChecker Tile in cavern)
+                //Debug.Log("Cavern Number: "+id+" Cavern Size: "+cavern.Count+" Parent Tile: "+(col*cavern[0].tileX+cavern[0].tileY));
+                if (cavern.Count <= caveSize + 1)
                 {
-                    mapLayout[Tile.tileX, Tile.tileY] = 0;
+                    foreach (PreciseTileChecker Tile in cavern)
+                    {
+                        mapLayout[Tile.tileX, Tile.tileY] = 0;
+                    }
+                }
+                else
+                {
+                    survivingRegions.Add(new Cavern(cavern, mapLayout, row, col));
                 }
             }
-            else
-            {
-                survivingRegions.Add(new Cavern(cavern, mapLayout));
-            }
-        }
-
-        ConnectCaverns(survivingRegions);
+            previousRoomCount = survivingRegions.Count();
+            ConnectCaverns(survivingRegions);
+       }
+        
     }
 
     private List<List<PreciseTileChecker>> GetRegions()
@@ -292,7 +316,7 @@ public class PreciseMap
             //Literally does nothing, Congrats this is a useless constructor
         }
 
-        public Cavern(List<PreciseTileChecker> caveTiles, int[,] map)
+        public Cavern(List<PreciseTileChecker> caveTiles, int[,] map, int Row, int Col)
         {
             //This is the real constructor
             tiles = caveTiles; //List of tiles in the cavern we are checking
@@ -306,7 +330,7 @@ public class PreciseMap
                 {
                     for (var y = tile.tileY - 1; y <= tile.tileY + 1; y++)
                     {
-                        if (x == tile.tileX || y == tile.tileY)
+                        if ((x == tile.tileX || y == tile.tileY) && x >= 0 && x < Row && y >= 0 && y < Col)
                         {
                             if (map[x, y] == 1)
                             {
@@ -420,14 +444,13 @@ public class PreciseMap
                 }
             }
 
-            /*if (connectonFound && !forceAccessibilityFromMain)
+            if (connectonFound && !forceAccessibilityFromMain)
             {
                 CreatePath(bestCaveA, bestCaveB, bestTileA, bestTileB);
-            }*/
-            CreatePath(bestCaveA, bestCaveB, bestTileA, bestTileB);
+            }
         }
 
-        /*if(connectonFound && forceAccessibilityFromMain)
+        if(connectonFound && forceAccessibilityFromMain)
         {
             CreatePath(bestCaveA, bestCaveB, bestTileA, bestTileB);
             ConnectCaverns(Caves, true);
@@ -435,8 +458,8 @@ public class PreciseMap
 
         if (!forceAccessibilityFromMain)
         {
-            ConnectCaverns(Caves, false);
-        }*/
+            ConnectCaverns(Caves, true);
+        }
 
     } // <3
 
@@ -445,7 +468,6 @@ public class PreciseMap
         Cavern.ConnectCaves(caveA, caveB);
         //Debug.Log("Tile A ID:" + mapTiles[col * tileA.tileX + tileA.tileY].TileID + " Tile B ID:" + mapTiles[col * tileB.tileX + tileB.tileY].TileID);
         //Debug.Log("Tile A X:" + tileA.tileX + " Tile A Y:" + tileA.tileY + " Tile B X:" + tileB.tileX + " Tile B Y:" + tileB.tileY);
-        //Debug.DrawLine(DisplayLine(tileA), DisplayLine(tileB), Color.green, 100);
         //Debug.Log("Begin Line");
         List<PreciseTileChecker> line = GetPassageTiles(tileA, tileB);
         foreach (PreciseTileChecker t in line)
@@ -483,14 +505,11 @@ public class PreciseMap
 
         int x = from.tileX;
         int y = from.tileY;
-
         int dx = to.tileX - from.tileX;
         int dy = to.tileY - from.tileY;
-
         bool inverted = false;
         int step = Math.Sign(dx);
         int gradient = Math.Sign(dy);
-
         int longest = Mathf.Abs(dx);
         int shortest = Mathf.Abs(dy);
 
@@ -499,7 +518,6 @@ public class PreciseMap
             inverted = true;
             longest = Mathf.Abs(dy);
             shortest = Mathf.Abs(dx);
-
             step = Math.Sign(dy);
             gradient = Math.Sign(dx);
         }
@@ -519,6 +537,7 @@ public class PreciseMap
             }
 
             gradientAcc += shortest;
+
             if (gradientAcc >= longest)
             {
                 if (inverted)
@@ -532,12 +551,8 @@ public class PreciseMap
 
                 gradientAcc -= longest;
             }
-
-            Debug.Log("X = " + x + " Y = " + y);
+            //Debug.Log("X = " + x + " Y = " + y);
         }
-
-        // Add a debug statement here to check to see what line math is returning.
-
         return line;
     }
 }
