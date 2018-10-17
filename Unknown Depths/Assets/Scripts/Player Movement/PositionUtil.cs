@@ -7,6 +7,8 @@ using UnityEngine;
 /// 
 /// Most of this code is in reference to a tutorial found on
 /// LinkedIn Learning / Lynda. Tutorial by Jesse Freeman
+/// 
+/// https://www.linkedin.com/learning/unity-5-2d-movement-in-an-rpg-game
 /// </summary>
 
 public class PositionUtil{

@@ -1,14 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+/// <summary>
+///PixPerCam Class
+///
+///Most of this code is in refernece to a 2D Map
+///Generation tutuorial found on LinkedIn Learning or
+///Lynda.com. Tutorial by Jesse Freeman
+///
+///https://www.linkedin.com/learning/unity-5-2d-random-map-generation
+/// </summary>
 
-//PixPerCam Class
-
-//Most of this code is in refernece to a 2D Map
-//Generation tutuorial found on LinkedIn Learning or
-//Lynda.com. Tutorial by Jesse Freeman
-
-//https://www.linkedin.com/learning/unity-5-2d-random-map-generation
 
 public class PixPerCam : MonoBehaviour {
 

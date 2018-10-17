@@ -21,6 +21,8 @@ GameObject:
   - component: {fileID: 4709109170786584}
   - component: {fileID: 212010596514515518}
   - component: {fileID: 95437598051621072}
+  - component: {fileID: 114406371774016646}
+  - component: {fileID: 114800795105087852}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -59,6 +61,33 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &114406371774016646
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1356225274351316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66140955767c1f84f8640f900e152525, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tileSize: {x: 16, y: 16}
+  currentTile: 0
+  speed: 0.5
+  moving: 0
+  blockedTileTypes: ffffffff
+--- !u!114 &114800795105087852
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1356225274351316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c34aeaa49648b9408599cbe03e0fa35, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!212 &212010596514515518
 SpriteRenderer:
   m_ObjectHideFlags: 1

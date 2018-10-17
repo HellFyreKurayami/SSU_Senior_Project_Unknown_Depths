@@ -11,6 +11,7 @@ using UnityEngine;
 ///
 ///https://unity3d.com/learn/tutorials/projects/procedural-cave-generation-tutorial/
 ///https://www.linkedin.com/learning/unity-5-2d-random-map-generation 
+///https://www.linkedin.com/learning/unity-5-2d-movement-in-an-rpg-game
 /// </summary>
 
 public class MapMaker : MonoBehaviour {
@@ -33,6 +34,7 @@ public class MapMaker : MonoBehaviour {
     [Space]
     [Header("Map Sprites")]
     public Texture2D MapTexture;
+    public Texture2D fowTexture;
 
     [Space]
     [Header("Player")]
@@ -55,9 +57,13 @@ public class MapMaker : MonoBehaviour {
 
     private int tempX;
     private int tempY;
-
+    private Sprite[] caveTileSprites;
+    private Sprite[] fowTileSprites;
     // Use this for initialization
     void Start () {
+        caveTileSprites = Resources.LoadAll<Sprite>(MapTexture.name);
+        fowTileSprites = Resources.LoadAll<Sprite>(fowTexture.name);
+
         Map = new PreciseMap();
         Create();
         StartCoroutine(AddPlayer());
@@ -66,7 +72,7 @@ public class MapMaker : MonoBehaviour {
     IEnumerator AddPlayer()
     {
         yield return new WaitForEndOfFrame();
-        createPlayer();
+        CreatePlayer();
     }
 	
     public void Create()
@@ -81,8 +87,7 @@ public class MapMaker : MonoBehaviour {
     void CreateGrid()
     {
         ClearMap();
-        Sprite[] mSprites = Resources.LoadAll<Sprite>(MapTexture.name);
-
+        
         var Total = Map.mapTiles.Length;
         var MaxColumns = Map.col;
         var Col = 0;
@@ -100,14 +105,7 @@ public class MapMaker : MonoBehaviour {
             go.transform.SetParent(MapContainer.transform);
             go.transform.position = new Vector3(tNewX, tNewY, 0);
 
-            var tile = Map.mapTiles[i];
-            var spriteID = tile.AutoTileID;
-
-            if (spriteID >= 0)
-            {
-                var sr = go.GetComponent<SpriteRenderer>();
-                sr.sprite = mSprites[spriteID];
-            }
+            DecorateTile(i);
 
             if (Col == (MaxColumns - 1))
             {
@@ -116,7 +114,20 @@ public class MapMaker : MonoBehaviour {
         }
     }
 
-    public void createPlayer()
+    private void DecorateTile(int tileID)
+    {
+        var tile = Map.mapTiles[tileID];
+        var spriteID = tile.AutoTileID;
+        var go = MapContainer.transform.GetChild(tileID).gameObject;
+
+        if (spriteID >= 0)
+        {
+            var sr = go.GetComponent<SpriteRenderer>();
+            sr.sprite = caveTileSprites[spriteID];
+        }
+    }
+
+    public void CreatePlayer()
     {
         player = Instantiate(playerPrefab);
         player.name = "Player";
@@ -126,6 +137,15 @@ public class MapMaker : MonoBehaviour {
         controller.map = Map;
         controller.tileSize = TileSize;
         controller.MoveTo(Map.caveEntranceTile.TileID);
+        controller.TileActionCallback += TileActionCallback;
+
+        var moveScript = Camera.main.GetComponent<MoveCamera>();
+        moveScript.target = player;
+    }
+
+    void TileActionCallback(int type)
+    {
+        //Debug.Log("On Tile Type: " + type);
     }
 
     void ClearMap()

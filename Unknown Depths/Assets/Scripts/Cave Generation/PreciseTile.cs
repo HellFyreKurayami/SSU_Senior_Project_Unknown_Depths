@@ -29,6 +29,9 @@ public class PreciseTile{
     public PreciseTile[] Neighbors = new PreciseTile[4]; //Contains all tiles adjacent to calling tile object
     public int AutoTileID; //Contains a reference to the sprite called on render
 
+    public bool visited;
+    public int fowAutoTileID;
+
     public void AddNeighbor(TileSides side, PreciseTile tile)
     {
         Neighbors[(int)side] = tile;
@@ -68,7 +71,7 @@ public class PreciseTile{
         CalcAutoTileID();
     }
 
-    public void CalcAutoTileID()
+    private void CalcAutoTileID()
     {
         var sidesValues = new StringBuilder();
         foreach (PreciseTile tile in Neighbors)
@@ -77,5 +80,23 @@ public class PreciseTile{
         }
 
         AutoTileID = System.Convert.ToInt32(sidesValues.ToString(), 2);
+    }
+
+    public void CalcFOWAutoTileID()
+    {
+        var sidesValues = new StringBuilder();
+        foreach (PreciseTile tile in Neighbors)
+        {
+            if(tile == null)
+            {
+                sidesValues.Append("0");
+            }
+            else
+            {
+                sidesValues.Append(tile.visited ? "0" : "1");
+            }
+        }
+
+        fowAutoTileID = System.Convert.ToInt32(sidesValues.ToString(), 2);
     }
 }

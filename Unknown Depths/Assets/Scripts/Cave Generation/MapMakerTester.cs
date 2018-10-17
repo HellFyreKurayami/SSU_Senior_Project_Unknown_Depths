@@ -35,7 +35,7 @@ public class MapMakerTester : Editor {
         {
             if (Application.isPlaying)
             {
-                script.createPlayer();
+                script.CreatePlayer();
             }
         }
     }
