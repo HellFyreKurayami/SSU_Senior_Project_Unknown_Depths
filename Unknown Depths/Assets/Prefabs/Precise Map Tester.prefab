@@ -34,7 +34,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1585396838307022}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 3.3125}
+  m_LocalPosition: {x: 0, y: 0, z: 3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -51,8 +51,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a13cdbd52c50b3740993eb00eeac3cd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MapWidth: 50
-  MapHeight: 50
+  MapWidth: 25
+  MapHeight: 25
   UseSeed: 1
   Seed: IHatePrograming
   MapContainer: {fileID: 1585396838307022}
@@ -63,6 +63,7 @@ MonoBehaviour:
   playerPrefab: {fileID: 1356225274351316, guid: 49f290e79de28694f83201da3bde99d6,
     type: 2}
   player: {fileID: 0}
+  viewDistance: 5
   caveErosion: 46
   roomThreshold: 3
   treasureChests: 1

@@ -40,6 +40,7 @@ public class MapMaker : MonoBehaviour {
     [Header("Player")]
     public GameObject playerPrefab;
     public GameObject player;
+    public int viewDistance = 3;
 
     [Space]
     [Header("Create Map")]
@@ -64,6 +65,11 @@ public class MapMaker : MonoBehaviour {
         caveTileSprites = Resources.LoadAll<Sprite>(MapTexture.name);
         fowTileSprites = Resources.LoadAll<Sprite>(fowTexture.name);
 
+        Reset();
+    }
+
+    public void Reset()
+    {
         Map = new PreciseMap();
         Create();
         StartCoroutine(AddPlayer());
@@ -123,7 +129,15 @@ public class MapMaker : MonoBehaviour {
         if (spriteID >= 0)
         {
             var sr = go.GetComponent<SpriteRenderer>();
-            sr.sprite = caveTileSprites[spriteID];
+            if (tile.visited)
+            {
+                sr.sprite = caveTileSprites[spriteID];
+            }
+            else
+            {
+                tile.CalcFOWAutoTileID();
+                sr.sprite = fowTileSprites[Mathf.Min(tile.fowAutoTileID, fowTileSprites.Length-1)];
+            }
         }
     }
 
@@ -136,16 +150,19 @@ public class MapMaker : MonoBehaviour {
         var controller = player.GetComponent<MapMovement>();
         controller.map = Map;
         controller.tileSize = TileSize;
-        controller.MoveTo(Map.caveEntranceTile.TileID);
         controller.TileActionCallback += TileActionCallback;
 
         var moveScript = Camera.main.GetComponent<MoveCamera>();
         moveScript.target = player;
+
+        controller.MoveTo(Map.caveEntranceTile.TileID);
     }
 
     void TileActionCallback(int type)
     {
         //Debug.Log("On Tile Type: " + type);
+        var tileID = player.GetComponent<MapMovement>().currentTile;
+        VisitTile(tileID);
     }
 
     void ClearMap()
@@ -167,5 +184,50 @@ public class MapMaker : MonoBehaviour {
         camPos.x = tempX * TileSize.x;
         camPos.y = -(tempY * TileSize.y);
         Camera.main.transform.position = camPos;
+    }
+
+    void VisitTile(int index)
+    {
+        int column, newX, newY, row = 0;
+        PositionUtil.CalcPosition(index, Map.col, out tempX, out tempY);
+        var half = Mathf.FloorToInt(viewDistance / 2f);
+        tempX -= half;
+        tempY -= half;
+
+        var total = viewDistance * viewDistance;
+        var maxCol = viewDistance - 1;
+
+        for(int i = 0; i < total; i++)
+        {
+            column = i % viewDistance;
+
+            newX = column + tempX;
+            newY = row + tempY;
+
+            PositionUtil.CalcIndex(newX, newY, Map.col, out index);
+            if(index > -1 && index < Map.mapTiles.Length)
+            {
+                var tile = Map.mapTiles[index];
+                tile.visited = true;
+                DecorateTile(index);
+
+                foreach(var neighbor in tile.Neighbors)
+                {
+                    if(neighbor != null)
+                    {
+                        if (!neighbor.visited)
+                        {
+                            neighbor.CalcFOWAutoTileID();
+                            DecorateTile(neighbor.TileID);
+                        }
+                    }
+                }
+            }
+
+            if(column == maxCol)
+            {
+                row++;
+            }
+        }
     }
 }

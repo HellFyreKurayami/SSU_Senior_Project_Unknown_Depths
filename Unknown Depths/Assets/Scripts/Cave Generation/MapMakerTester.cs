@@ -23,7 +23,7 @@ public class MapMakerTester : Editor {
 
         var script = (MapMaker)target;
 
-        if (GUILayout.Button("Generate Map"))
+        /*if (GUILayout.Button("Generate Map"))
         {
             if (Application.isPlaying)
             {
@@ -36,6 +36,14 @@ public class MapMakerTester : Editor {
             if (Application.isPlaying)
             {
                 script.CreatePlayer();
+            }
+        }*/
+
+        if (GUILayout.Button("Generate Map and Player"))
+        {
+            if (Application.isPlaying)
+            {
+                script.Reset();
             }
         }
     }

@@ -89,7 +89,7 @@ public class PreciseTile{
         {
             if(tile == null)
             {
-                sidesValues.Append("0");
+                sidesValues.Append("1");
             }
             else
             {
