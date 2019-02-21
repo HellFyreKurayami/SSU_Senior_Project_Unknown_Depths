@@ -9,61 +9,54 @@ Prefab:
     m_Modifications: []
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 0}
-  m_RootGameObject: {fileID: 1585396838307022}
+  m_RootGameObject: {fileID: 1158369292816778}
   m_IsPrefabAsset: 1
---- !u!1 &1585396838307022
+--- !u!1 &1158369292816778
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4032152498892250}
-  - component: {fileID: 114683034952627352}
+  - component: {fileID: 4309473049597432}
+  - component: {fileID: 114426119367828180}
   m_Layer: 0
-  m_Name: Precise Map Tester
+  m_Name: Aqua Blast
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4032152498892250
+--- !u!4 &4309473049597432
 Transform:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1585396838307022}
+  m_GameObject: {fileID: 1158369292816778}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 3}
+  m_LocalPosition: {x: -0.39332137, y: 0.3680264, z: 84.68819}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114683034952627352
+--- !u!114 &114426119367828180
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1585396838307022}
+  m_GameObject: {fileID: 1158369292816778}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a13cdbd52c50b3740993eb00eeac3cd8, type: 3}
+  m_Script: {fileID: 11500000, guid: f03f94889bee4c0418534abc8c2f0a17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MapWidth: 25
-  MapHeight: 25
-  UseSeed: 0
-  Seed: IHatePrograming
-  MapContainer: {fileID: 1585396838307022}
-  TilePrefab: {fileID: 1473856163004920, guid: 96f40d36fcfe2a2439cb32953f65dc98, type: 2}
-  TileSize: {x: 16, y: 16}
-  MapTexture: {fileID: 2800000, guid: 02307c5eacea591419e6c3f05529a152, type: 3}
-  fowTexture: {fileID: 2800000, guid: 80a1164ae5af2f546bfcaa3a51a5b696, type: 3}
-  playerPrefab: {fileID: 1356225274351316, guid: 49f290e79de28694f83201da3bde99d6,
-    type: 2}
-  player: {fileID: 0}
-  viewDistance: 5
-  caveErosion: 46
-  roomThreshold: 3
-  treasureChests: 1
+  SpellName: Aqua Blast
+  Tier: 1
+  Cost: 5
+  Hits: 1
+  UnlockLevel: 3
+  Type: 0
+  Target: 0
+  Attr: 1
+  Elements: 01000000

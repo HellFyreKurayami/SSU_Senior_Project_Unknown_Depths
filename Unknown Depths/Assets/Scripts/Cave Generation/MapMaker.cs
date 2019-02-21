@@ -56,23 +56,35 @@ public class MapMaker : MonoBehaviour {
 
     public PreciseMap Map;
 
+    private int floor = 0;
+
     private int tempX;
     private int tempY;
     private Sprite[] caveTileSprites;
     private Sprite[] fowTileSprites;
     // Use this for initialization
-    void Start () {
+
+    public WindowManager windowManager
+    {
+        get
+        {
+            return GenericWindow.manager;
+        }
+    }
+    
+    public void Reset()
+    {
         caveTileSprites = Resources.LoadAll<Sprite>(MapTexture.name);
         fowTileSprites = Resources.LoadAll<Sprite>(fowTexture.name);
 
-        Reset();
-    }
-
-    public void Reset()
-    {
         Map = new PreciseMap();
         Create();
         StartCoroutine(AddPlayer());
+    }
+
+    public void Shutdown()
+    {
+        ClearMap();
     }
 
     IEnumerator AddPlayer()
@@ -163,6 +175,12 @@ public class MapMaker : MonoBehaviour {
         //Debug.Log("On Tile Type: " + type);
         var tileID = player.GetComponent<MapMovement>().currentTile;
         VisitTile(tileID);
+        if (player.GetComponent<MapMovement>().currentTile.Equals(Map.caveExitTile.TileID))
+        {
+            MapHeight += 5;
+            MapWidth += 5;
+            Reset();
+        }
     }
 
     void ClearMap()
@@ -222,6 +240,7 @@ public class MapMaker : MonoBehaviour {
                         }
                     }
                 }
+
             }
 
             if(column == maxCol)
