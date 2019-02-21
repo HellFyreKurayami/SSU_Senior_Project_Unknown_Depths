@@ -7,8 +7,7 @@ public class BattleLauncher : MonoBehaviour {
     public List<Entity> Players { get; set; }
     public List<Entity> Enemies { get; set; }
 
-	// Use this for initialization
-	void Awake () {
+    void Awake () {
 
         DontDestroyOnLoad(this);
 		
@@ -19,11 +18,16 @@ public class BattleLauncher : MonoBehaviour {
         Players = c;
         Enemies = e;
 
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Combat Testing");
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Combat");
     }
 
     public void Launch()
     {
         BattleController.BATTLE_CONTROLLER.StartBattle(Players, Enemies);
+    }
+
+    private void ReturnToMap()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene("World");
     }
 }

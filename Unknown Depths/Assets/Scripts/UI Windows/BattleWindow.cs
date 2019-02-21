@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BattleController : MonoBehaviour {
-    public static BattleController BATTLE_CONTROLLER { get; set; }
-
+public class BattleWindow : GenericWindow {
     [SerializeField]
     private BattleSpawnPoint[] SpawnPoints;
 
@@ -13,33 +11,17 @@ public class BattleController : MonoBehaviour {
     public Skill playerSelected;
     public bool playerAttacking;
 
-    private void Awake()
-    {
-        if(FindObjectsOfType<BattleLauncher>().Length > 1)
-        {
-            Destroy(this.gameObject);
-        }
-        DontDestroyOnLoad(this);
-    }
+    public delegate void BattleOver(bool playerWin);
+    public BattleOver battleOverCall;
 
-    private void Start()
-    {
-        if(BATTLE_CONTROLLER != null && BATTLE_CONTROLLER != this)
-        {
-            Destroy(this.gameObject);
-        }
-        else
-        {
-            BATTLE_CONTROLLER = this;
-        }
-        FindObjectOfType<BattleLauncher>().Launch();
-    }
+    [SerializeField]
+    private BattleUIController UI;
 
     public void StartBattle(List<Entity> c, List<Entity> e)
     {
-        for(int i = 0; i < c.Count; i++)
+        for (int i = 0; i < c.Count; i++)
         {
-            ActiveBattleMembers.Add(SpawnPoints[i+4].spawn(c[i]));
+            ActiveBattleMembers.Add(SpawnPoints[i + 4].spawn(c[i]));
         }
         for (int i = 0; i < e.Count; i++)
         {
@@ -49,13 +31,13 @@ public class BattleController : MonoBehaviour {
         ActiveBattleMembers.Sort((x1, x2) => x1.Speed.CompareTo(x2.Speed));
         ActiveBattleMembers.Reverse();
         Debug.Log(string.Format("Current Turn: {0} with {1} as the turn entity", currentTurn, GetCurrentCharacter().EntityName));
-        BattleUIController.BATTLE_UI_CONTROLLER.UpdateAction(string.Format("What Will {0} Do?", GetCurrentCharacter().EntityName));
-        //BattleUIController.BATTLE_UI_CONTROLLER.UpdateCharUI();
+        UI.UpdateAction(string.Format("What Will {0} Do?", GetCurrentCharacter().EntityName));
+        UpdateCharUI();
     }
 
     private void NextTurn()
     {
-        if(currentTurn + 1 > ActiveBattleMembers.Count - 1)
+        if (currentTurn + 1 > ActiveBattleMembers.Count - 1)
         {
             currentTurn = 0;
         }
@@ -64,40 +46,40 @@ public class BattleController : MonoBehaviour {
             currentTurn += 1;
         }
     }
-    
+
     private void NextAct()
     {
         List<Entity> c = ActiveBattleMembers.FindAll(x => x.Chara.Equals(CharaType.PLAYER));
         List<Entity> e = ActiveBattleMembers.FindAll(x => x.Chara.Equals(CharaType.ENEMY));
-        if(c.Count > 0 && e.Count > 0)
+        if (c.Count > 0 && e.Count > 0)
         {
             NextTurn();
             Debug.Log(string.Format("Current Turn: {0} with {1} as the turn entity", currentTurn, GetCurrentCharacter().EntityName));
         }
         else
         {
-            if(c.Count == 0)
+            if (c.Count == 0)
             {
                 Debug.Log("Battle Has Ended");
-                BattleUIController.BATTLE_UI_CONTROLLER.UpdateAction("And they were never heard from again...");
-                UnityEngine.SceneManagement.SceneManager.LoadScene("End");
+                UI.UpdateAction("And they were never heard from again...");
+                battleOverCall(false);
             }
-            else if(e.Count == 0)
+            else if (e.Count == 0)
             {
                 Debug.Log("Battle Has Ended");
-                UnityEngine.SceneManagement.SceneManager.LoadScene("World");
+                battleOverCall(true);
             }
         }
-        
+
         if (GetCurrentCharacter().Chara.Equals(CharaType.PLAYER))
         {
-            BattleUIController.BATTLE_UI_CONTROLLER.ToggleActionState(true);
-            BattleUIController.BATTLE_UI_CONTROLLER.BuildSpellList(GetCurrentCharacter().Skills);
-            BattleUIController.BATTLE_UI_CONTROLLER.UpdateAction(string.Format("What Will {0} Do?", GetCurrentCharacter().EntityName));
+            UI.ToggleActionState(true);
+            UI.BuildSpellList(GetCurrentCharacter().Skills);
+            UI.UpdateAction(string.Format("What Will {0} Do?", GetCurrentCharacter().EntityName));
         }
         else
         {
-            BattleUIController.BATTLE_UI_CONTROLLER.ToggleActionState(false);
+            UI.ToggleActionState(false);
             StartCoroutine(PerformAct());
         }
     }
@@ -109,7 +91,7 @@ public class BattleController : MonoBehaviour {
         {
             GetCurrentCharacter().GetComponent<Enemy>().Act();
         }
-        //BattleUIController.BATTLE_UI_CONTROLLER.UpdateCharUI();
+        UpdateCharUI();
         yield return new WaitForSeconds(3.0f);
         NextAct();
     }
@@ -123,11 +105,11 @@ public class BattleController : MonoBehaviour {
             Invoke("NextAct", 3);
             //NextAct();
         }
-        else if(playerSelected != null)
+        else if (playerSelected != null)
         {
-            if(GetCurrentCharacter().CastSpell(playerSelected, e))
+            if (GetCurrentCharacter().CastSpell(playerSelected, e))
             {
-                //BattleUIController.BATTLE_UI_CONTROLLER.UpdateCharUI();
+                UpdateCharUI();
                 Invoke("NextAct", 3);
                 //NextAct();
             }
@@ -152,12 +134,12 @@ public class BattleController : MonoBehaviour {
 
     public Entity GetWeakestEnemy()
     {
-        
+
         List<Entity> e = ActiveBattleMembers.FindAll(x => x.Chara.Equals(CharaType.ENEMY));
         Entity weakest = e[0];
         foreach (Entity x in e)
         {
-            if(x.CurrentHealth < weakest.CurrentHealth)
+            if (x.CurrentHealth < weakest.CurrentHealth)
             {
                 weakest = x;
             }
@@ -168,5 +150,15 @@ public class BattleController : MonoBehaviour {
     public Entity GetCurrentCharacter()
     {
         return ActiveBattleMembers[currentTurn];
+    }
+
+    public void UpdateCharUI()
+    {
+        List<Entity> c = ActiveBattleMembers.FindAll(x => x.Chara.Equals(CharaType.PLAYER));
+        for (int i = 0; i < c.Count; i++)
+        {
+            Entity p = c[i];
+            UI.entityInfo[i].text = string.Format("{0} - HP: {1}/{2} | MP: {3}/{4}", p.EntityName, p.CurrentHealth, p.MaxHealth, p.CurrentMagicPoints, p.MaxMagicPoints);
+        }
     }
 }

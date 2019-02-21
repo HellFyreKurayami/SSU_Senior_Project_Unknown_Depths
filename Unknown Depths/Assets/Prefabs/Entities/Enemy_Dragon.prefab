@@ -23,7 +23,7 @@ GameObject:
   - component: {fileID: 212405688062136414}
   - component: {fileID: 61804561307727422}
   m_Layer: 0
-  m_Name: Enemy Dragon
+  m_Name: Enemy_Dragon
   m_TagString: Entity
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

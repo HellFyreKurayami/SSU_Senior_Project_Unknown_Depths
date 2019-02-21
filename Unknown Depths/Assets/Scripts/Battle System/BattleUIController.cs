@@ -14,7 +14,7 @@ public class BattleUIController : MonoBehaviour {
     [SerializeField]
     private Button button;
     [SerializeField]
-    private Text[] entityInfo;
+    public Text[] entityInfo;
     [SerializeField]
     private Text action;
 
@@ -41,18 +41,8 @@ public class BattleUIController : MonoBehaviour {
             if (hitInfo.collider != null && hitInfo.collider.CompareTag("Entity"))
             {
                 Debug.Log("You Clicked an Entity");
-                BattleController.BATTLE_CONTROLLER.SelectCharacter(hitInfo.collider.GetComponent<Entity>());
+                //BattleController.BATTLE_CONTROLLER.SelectCharacter(hitInfo.collider.GetComponent<Entity>());
             }
-        }
-    }
-
-    public void UpdateCharUI()
-    {
-        List<Entity> c = BattleController.BATTLE_CONTROLLER.ActiveBattleMembers.FindAll(x => x.Chara.Equals(CharaType.PLAYER));
-        for(int i = 0; i<c.Count; i++)
-        {
-            Entity p = c[i];
-            entityInfo[i].text = string.Format("{0} - HP: {1}/{2} | MP: {3}/{4}", p.EntityName, p.CurrentHealth, p.MaxHealth, p.CurrentMagicPoints, p.MaxMagicPoints);
         }
     }
 

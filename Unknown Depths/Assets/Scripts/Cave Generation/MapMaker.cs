@@ -54,9 +54,16 @@ public class MapMaker : MonoBehaviour {
     [Range(0, 10)]
     public int treasureChests = 1;
 
+    [Space]
+    [Header("Battle Information")]
+    public List<Entity> Players = null;
+    public List<Entity> Enemies = null;
+
     public PreciseMap Map;
 
-    private int floor = 0;
+    private BattleWindow battleWindow;
+    private FloorWindow floorWindow;
+    private int floor = 1;
 
     private int tempX;
     private int tempY;
@@ -100,6 +107,10 @@ public class MapMaker : MonoBehaviour {
         Map.CreateCave(UseSeed, Seed, caveErosion, roomThreshold, treasureChests);
         CreateGrid();
         CenterMap(Map.caveEntranceTile.TileID);
+
+        //Display Floor Stats
+        floorWindow = windowManager.Open((int)Windows.FloorWindow - 1, false) as FloorWindow;
+        floorWindow.UpdateFloor(floor);
     }
 
     void CreateGrid()
@@ -179,7 +190,21 @@ public class MapMaker : MonoBehaviour {
         {
             MapHeight += 5;
             MapWidth += 5;
+            floor++;
             Reset();
+        }
+        else if(type == 20) // Treasure Chest
+        {
+
+        }
+        else
+        {
+            var chance = Random.Range(0, 1f);
+            if(chance < 0.3f && !player.GetComponent<MapMovement>().currentTile.Equals(Map.caveEntranceTile.TileID))
+            {
+                Debug.Log("Battle Starting");
+                StartBattle();
+            }
         }
     }
 
@@ -248,5 +273,43 @@ public class MapMaker : MonoBehaviour {
                 row++;
             }
         }
+    }
+
+    public void StartBattle()
+    {
+        battleWindow = windowManager.Open((int)Windows.BattleWindow - 1) as BattleWindow;
+        battleWindow.battleOverCall += BattleOver;
+
+        battleWindow.StartBattle(Players, Enemies);
+        battleWindow.UpdateCharUI();
+
+        ToggleMovement(false);
+    }
+
+    public void EndBattle()
+    {
+        battleWindow.Close();
+        ToggleMovement(true);
+    }
+
+    private void ToggleMovement(bool state)
+    {
+        player.GetComponent<MapMovement>().enabled = state;
+        Camera.main.GetComponent<MoveCamera>().enabled = state;
+    }
+
+    private void BattleOver(bool playerWin)
+    {
+        EndBattle();
+        if (!playerWin)
+        {
+            StartCoroutine(ExitGame());
+        }
+    }
+
+    IEnumerator ExitGame()
+    {
+        yield return new WaitForSeconds(5);
+        windowManager.Open((int)Windows.StartWindow - 1);
     }
 }

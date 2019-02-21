@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &100100000
+Prefab:
+  m_ObjectHideFlags: 1
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications: []
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 0}
+  m_RootGameObject: {fileID: 1630016707784750}
+  m_IsPrefabAsset: 1
+--- !u!1 &1630016707784750
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 224027577379215152}
+  - component: {fileID: 114909759244645364}
+  m_Layer: 5
+  m_Name: Battle Launcher
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &114909759244645364
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1630016707784750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 531821cfa0362c848a0daa53d6834a4e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Players:
+  - {fileID: 114401414981041838, guid: 08b1cc21d92c75048baa2eead7b1773c, type: 2}
+  - {fileID: 114908267703386276, guid: e7fd541179ac4174da37f246651e0f7f, type: 2}
+  - {fileID: 114934871913682618, guid: dbd1738de80d2af47a931b928de1047e, type: 2}
+  - {fileID: 114066671054338756, guid: 67665ecdc41a34e4e8c4be1cf3bf11cd, type: 2}
+  Enemies:
+  - {fileID: 114019744633382058, guid: 55e634d73266a3c45bf2c41306ecb009, type: 2}
+  - {fileID: 114796757425687202, guid: bd0d455bafc5ddc468409be2cc847c6d, type: 2}
+  - {fileID: 114019744633382058, guid: 55e634d73266a3c45bf2c41306ecb009, type: 2}
+  - {fileID: 114796757425687202, guid: bd0d455bafc5ddc468409be2cc847c6d, type: 2}
+  launcher: {fileID: 114483094400053472, guid: 0d68ae6e1aa8f9d4583f234c85012a61, type: 2}
+--- !u!224 &224027577379215152
+RectTransform:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1630016707784750}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
