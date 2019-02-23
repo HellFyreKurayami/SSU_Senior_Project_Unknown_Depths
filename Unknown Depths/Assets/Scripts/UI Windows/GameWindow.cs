@@ -23,6 +23,6 @@ public class GameWindow : GenericWindow {
     {
         base.Close();
         mapMaker.Shutdown();
+        Camera.main.GetComponent<MoveCamera>().enabled = false;
     }
-
 }

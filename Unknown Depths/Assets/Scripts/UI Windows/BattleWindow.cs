@@ -1,10 +1,24 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BattleWindow : GenericWindow {
+
+    public static BattleWindow Instance { get; set; }
+
     [SerializeField]
     private BattleSpawnPoint[] SpawnPoints;
+    [SerializeField]
+    private GameObject spellPanel;
+    [SerializeField]
+    private Button[] actionButtons;
+    [SerializeField]
+    private Button button;
+    [SerializeField]
+    public Text[] entityInfo;
+    [SerializeField]
+    private Text action;
 
     public List<Entity> ActiveBattleMembers = new List<Entity>();
     public int currentTurn = 0;
@@ -13,9 +27,6 @@ public class BattleWindow : GenericWindow {
 
     public delegate void BattleOver(bool playerWin);
     public BattleOver battleOverCall;
-
-    [SerializeField]
-    private BattleUIController UI;
 
     public void StartBattle(List<Entity> c, List<Entity> e)
     {
@@ -31,8 +42,24 @@ public class BattleWindow : GenericWindow {
         ActiveBattleMembers.Sort((x1, x2) => x1.Speed.CompareTo(x2.Speed));
         ActiveBattleMembers.Reverse();
         Debug.Log(string.Format("Current Turn: {0} with {1} as the turn entity", currentTurn, GetCurrentCharacter().EntityName));
-        UI.UpdateAction(string.Format("What Will {0} Do?", GetCurrentCharacter().EntityName));
+        UpdateAction(string.Format("What Will {0} Do?", GetCurrentCharacter().EntityName));
         UpdateCharUI();
+        spellPanel.SetActive(false);
+    }
+
+    private void Update()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            //This may be useless, will change later
+            Ray r = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit2D hitInfo = Physics2D.Raycast(r.origin, r.direction);
+            if (hitInfo.collider != null && hitInfo.collider.CompareTag("Entity"))
+            {
+                Debug.Log("You Clicked an Entity");
+                SelectCharacter(hitInfo.collider.GetComponent<Entity>());
+            }
+        }
     }
 
     private void NextTurn()
@@ -61,7 +88,7 @@ public class BattleWindow : GenericWindow {
             if (c.Count == 0)
             {
                 Debug.Log("Battle Has Ended");
-                UI.UpdateAction("And they were never heard from again...");
+                UpdateAction("And they were never heard from again...");
                 battleOverCall(false);
             }
             else if (e.Count == 0)
@@ -73,13 +100,13 @@ public class BattleWindow : GenericWindow {
 
         if (GetCurrentCharacter().Chara.Equals(CharaType.PLAYER))
         {
-            UI.ToggleActionState(true);
-            UI.BuildSpellList(GetCurrentCharacter().Skills);
-            UI.UpdateAction(string.Format("What Will {0} Do?", GetCurrentCharacter().EntityName));
+            ToggleActionState(true);
+            BuildSpellList(GetCurrentCharacter().Skills);
+            UpdateAction(string.Format("What Will {0} Do?", GetCurrentCharacter().EntityName));
         }
         else
         {
-            UI.ToggleActionState(false);
+            ToggleActionState(false);
             StartCoroutine(PerformAct());
         }
     }
@@ -158,7 +185,66 @@ public class BattleWindow : GenericWindow {
         for (int i = 0; i < c.Count; i++)
         {
             Entity p = c[i];
-            UI.entityInfo[i].text = string.Format("{0} - HP: {1}/{2} | MP: {3}/{4}", p.EntityName, p.CurrentHealth, p.MaxHealth, p.CurrentMagicPoints, p.MaxMagicPoints);
+            entityInfo[i].text = string.Format("{0} - HP: {1}/{2} | MP: {3}/{4}", p.EntityName, p.CurrentHealth, p.MaxHealth, p.CurrentMagicPoints, p.MaxMagicPoints);
         }
+    }
+
+    //UI UPDATES
+
+    public void UpdateAction(string s)
+    {
+        action.text = s;
+    }
+
+    public void ToggleSpellPanel(bool state)
+    {
+        spellPanel.SetActive(state);
+        if (state == true)
+        {
+            BuildSpellList(GetCurrentCharacter().Skills);
+        }
+    }
+
+    public void ToggleActionState(bool state)
+    {
+        ToggleSpellPanel(state);
+        foreach (Button b in actionButtons)
+        {
+            b.interactable = state;
+        }
+    }
+
+    public void BuildSpellList(List<Skill> spells)
+    {
+        //Remove visable spells in spell panel
+        if (spellPanel.transform.childCount > 0)
+        {
+            foreach (Button b in spellPanel.transform.GetComponentsInChildren<Button>())
+            {
+                Destroy(b.gameObject);
+            }
+        }
+
+        foreach (Skill s in spells)
+        {
+            if (!s.SpellName.Equals("Basic Attack"))
+            {
+                Button spellButton = Instantiate<Button>(button, spellPanel.transform);
+                spellButton.GetComponentInChildren<Text>().text = s.SpellName;
+                spellButton.onClick.AddListener(() => SelectSpell(s));
+            }
+        }
+    }
+
+    public void SelectAttack()
+    {
+        playerSelected = null;
+        playerAttacking = true;
+    }
+
+    private void SelectSpell(Skill spell)
+    {
+        playerSelected = spell;
+        playerAttacking = false;
     }
 }

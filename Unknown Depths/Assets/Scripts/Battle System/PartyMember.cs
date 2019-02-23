@@ -7,7 +7,7 @@ public class PartyMember : Entity {
     public override void Die()
     {
         base.Die();
-        BattleUIController.BATTLE_UI_CONTROLLER.UpdateAction(string.Format("{0} has been killed. What the hell was the Cleric doing?!?", this.EntityName));
-        BattleController.BATTLE_CONTROLLER.ActiveBattleMembers.Remove(this);
+        BattleWindow.Instance.UpdateAction(string.Format("{0} has been killed. What the hell was the Cleric doing?!?", this.EntityName));
+        BattleWindow.Instance.ActiveBattleMembers.Remove(this);
     }
 }

@@ -10,26 +10,26 @@ public class Enemy : Entity {
     public void Act()
     {
         int act = Random.Range(0, 2);
-        Entity target = BattleController.BATTLE_CONTROLLER.GetRandomPlayer();
+        Entity target = BattleWindow.Instance.GetRandomPlayer();
         Skill ToCastAttack = null;
         switch (act)
         {
             case 0: // Basic Attack
-                BattleController.BATTLE_CONTROLLER.DoAttack(this, target);
+                BattleWindow.Instance.DoAttack(this, target);
                 break;
             case 1: // Cast Attack Spell
                 ToCastAttack = GetRandomSpell(Skills);
                 if(!CastSpell(ToCastAttack, target))
                 {
-                    BattleController.BATTLE_CONTROLLER.DoAttack(this, target);
+                    BattleWindow.Instance.DoAttack(this, target);
                 }
                 break;
             case 2: // Cast Heal Spell
                 Skill ToCastHeal = GetRandomSpell(HealingSkills);
-                Entity healTarget = BattleController.BATTLE_CONTROLLER.GetWeakestEnemy();
+                Entity healTarget = BattleWindow.Instance.GetWeakestEnemy();
                 if (!CastSpell(ToCastHeal, healTarget))
                 {
-                    BattleController.BATTLE_CONTROLLER.DoAttack(this, target);
+                    BattleWindow.Instance.DoAttack(this, target);
                 }
                 break;
         }
@@ -44,7 +44,7 @@ public class Enemy : Entity {
     public override void Die()
     {
         base.Die();
-        BattleUIController.BATTLE_UI_CONTROLLER.UpdateAction(string.Format("{0} has been slain!", this.EntityName));
-        BattleController.BATTLE_CONTROLLER.ActiveBattleMembers.Remove(this);
+        BattleWindow.Instance.UpdateAction(string.Format("{0} has been slain!", this.EntityName));
+        BattleWindow.Instance.ActiveBattleMembers.Remove(this);
     }
 }

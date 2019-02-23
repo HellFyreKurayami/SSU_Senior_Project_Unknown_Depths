@@ -57,7 +57,7 @@ public class Skill : MonoBehaviour {
                         {
                             amt = (int)(caster.MagAttack * modifier * Random.Range(0.3f, 0.7f)) - target.MagDefense;
                             amt = amt < 1 ? 1 : amt;
-                            BattleUIController.BATTLE_UI_CONTROLLER.UpdateAction(string.Format("{0} cast {1} against {2} and dealt {3} damage. How weak...", caster.EntityName, this.SpellName, target.EntityName, amt));
+                            BattleWindow.Instance.UpdateAction(string.Format("{0} cast {1} against {2} and dealt {3} damage. How weak...", caster.EntityName, this.SpellName, target.EntityName, amt));
                             target.Damage(amt);
                         }
                     }
@@ -68,7 +68,7 @@ public class Skill : MonoBehaviour {
                         {
                             amt = (int)(caster.MagAttack * modifier * Random.Range(1.2f, 1.5f)) - target.MagDefense;
                             amt = amt < 1 ? 1 : amt;
-                            BattleUIController.BATTLE_UI_CONTROLLER.UpdateAction(string.Format("{0} cast {1} against {2} and dealt {3} damage. Sugoi!", caster.EntityName, this.SpellName, target.EntityName, amt));
+                            BattleWindow.Instance.UpdateAction(string.Format("{0} cast {1} against {2} and dealt {3} damage. Sugoi!", caster.EntityName, this.SpellName, target.EntityName, amt));
                             target.Damage(amt);
                         }
                     }
@@ -79,7 +79,7 @@ public class Skill : MonoBehaviour {
                         {
                             amt = (int)(caster.MagAttack * modifier * Random.Range(1.0f, 1.2f)) - target.MagDefense;
                             amt = amt < 1 ? 1 : amt;
-                            BattleUIController.BATTLE_UI_CONTROLLER.UpdateAction(string.Format("{0} cast {1} against {2} and dealt {3} damage.", caster.EntityName, this.SpellName, target.EntityName, amt));
+                            BattleWindow.Instance.UpdateAction(string.Format("{0} cast {1} against {2} and dealt {3} damage.", caster.EntityName, this.SpellName, target.EntityName, amt));
                             target.Damage(amt);
                         }
                     }
@@ -90,7 +90,7 @@ public class Skill : MonoBehaviour {
                     {
                         amt = (int)(caster.PhysAttack * modifier * Random.Range(1.2f, 1.5f)) - target.PhysDefense;
                         amt = amt < 1 ? 1 : amt;
-                        BattleUIController.BATTLE_UI_CONTROLLER.UpdateAction(string.Format("{0} used {1} against {2} and dealt {3} damage.", caster.EntityName, this.SpellName, target.EntityName, amt));
+                        BattleWindow.Instance.UpdateAction(string.Format("{0} used {1} against {2} and dealt {3} damage.", caster.EntityName, this.SpellName, target.EntityName, amt));
                         target.Damage(amt);
                     }
                 }
@@ -98,7 +98,7 @@ public class Skill : MonoBehaviour {
                 {
                     amt = (int)(caster.PhysAttack * modifier * Random.Range(0.8f, 1.1f)) - target.PhysDefense;
                     amt = amt < 1 ? 1 : amt;
-                    BattleUIController.BATTLE_UI_CONTROLLER.UpdateAction(string.Format("{0} used a basic attack and dealt {1} damage to {2}", caster.EntityName, amt, target.EntityName));
+                    BattleWindow.Instance.UpdateAction(string.Format("{0} used a basic attack and dealt {1} damage to {2}", caster.EntityName, amt, target.EntityName));
                     target.Damage(amt);
                 }
             }

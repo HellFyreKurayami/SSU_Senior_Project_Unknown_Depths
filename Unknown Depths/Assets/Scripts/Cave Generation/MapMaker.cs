@@ -61,7 +61,7 @@ public class MapMaker : MonoBehaviour {
 
     public PreciseMap Map;
 
-    private BattleWindow battleWindow;
+    private TestBattleWindow battleWindow;
     private FloorWindow floorWindow;
     private int floor = 1;
 
@@ -107,10 +107,6 @@ public class MapMaker : MonoBehaviour {
         Map.CreateCave(UseSeed, Seed, caveErosion, roomThreshold, treasureChests);
         CreateGrid();
         CenterMap(Map.caveEntranceTile.TileID);
-
-        //Display Floor Stats
-        floorWindow = windowManager.Open((int)Windows.FloorWindow - 1, false) as FloorWindow;
-        floorWindow.UpdateFloor(floor);
     }
 
     void CreateGrid()
@@ -179,6 +175,10 @@ public class MapMaker : MonoBehaviour {
         moveScript.target = player;
 
         controller.MoveTo(Map.caveEntranceTile.TileID);
+
+        //Display Floor Stats
+        floorWindow = windowManager.Open((int)Windows.FloorWindow - 1, false) as FloorWindow;
+        floorWindow.UpdateFloor(floor);
     }
 
     void TileActionCallback(int type)
@@ -277,11 +277,11 @@ public class MapMaker : MonoBehaviour {
 
     public void StartBattle()
     {
-        battleWindow = windowManager.Open((int)Windows.BattleWindow - 1) as BattleWindow;
-        battleWindow.battleOverCall += BattleOver;
+        battleWindow = windowManager.Open((int)Windows.TestBattleWindow - 1, true) as TestBattleWindow;
+        //battleWindow.battleOverCall += BattleOver;
 
         battleWindow.StartBattle(Players, Enemies);
-        battleWindow.UpdateCharUI();
+        //battleWindow.UpdateCharUI();
 
         ToggleMovement(false);
     }
