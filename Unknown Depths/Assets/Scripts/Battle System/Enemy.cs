@@ -5,7 +5,6 @@ using UnityEngine;
 public class Enemy : Entity {
 
     List<Skill> HealingSkills = new List<Skill>();
-    
 
     public void Act()
     {

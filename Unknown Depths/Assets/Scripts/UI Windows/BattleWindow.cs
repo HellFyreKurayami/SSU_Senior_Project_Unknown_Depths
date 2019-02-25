@@ -28,15 +28,33 @@ public class BattleWindow : GenericWindow {
     public delegate void BattleOver(bool playerWin);
     public BattleOver battleOverCall;
 
-    public void StartBattle(List<Entity> c, List<Entity> e)
+
+    private void Start()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this.gameObject);
+        }
+        else
+        {
+            Instance = this;
+        }
+        spellPanel.SetActive(false);
+    }
+
+    public void StartBattle(List<Entity> c, List<MapMaker.EnemySpawns> e, int floor)
+    {
+
         for (int i = 0; i < c.Count; i++)
         {
             ActiveBattleMembers.Add(SpawnPoints[i + 4].spawn(c[i]));
         }
-        for (int i = 0; i < e.Count; i++)
+
+        int inBattle = Random.Range(1, 5);
+        for (int i = 0; i < inBattle; i++)
         {
-            ActiveBattleMembers.Add(SpawnPoints[i].spawn(e[i]));
+            Enemy spawn = getEntityToSpawn(e[floor - 1].enemies);
+            ActiveBattleMembers.Add(SpawnPoints[i].spawn(spawn));
         }
 
         ActiveBattleMembers.Sort((x1, x2) => x1.Speed.CompareTo(x2.Speed));
@@ -45,6 +63,11 @@ public class BattleWindow : GenericWindow {
         UpdateAction(string.Format("What Will {0} Do?", GetCurrentCharacter().EntityName));
         UpdateCharUI();
         spellPanel.SetActive(false);
+    }
+
+    private Enemy getEntityToSpawn(List<Enemy> enemies)
+    {
+        return enemies[Random.Range(0, enemies.Count)];
     }
 
     private void Update()

@@ -16,6 +16,12 @@ using UnityEngine;
 
 public class MapMaker : MonoBehaviour {
 
+    [System.Serializable]
+    public struct EnemySpawns
+    {
+        [SerializeField] public List<Enemy> enemies;
+    }
+
     [Header("Map Dimensions")]
     public int MapWidth = 20;
     public int MapHeight = 20;
@@ -57,11 +63,13 @@ public class MapMaker : MonoBehaviour {
     [Space]
     [Header("Battle Information")]
     public List<Entity> Players = null;
-    public List<Entity> Enemies = null;
+    //public List<Entity> Enemies = null;
+    public List<EnemySpawns> EnemySpawnData;
+    
 
     public PreciseMap Map;
 
-    private TestBattleWindow battleWindow;
+    private BattleWindow battleWindow;
     private FloorWindow floorWindow;
     private int floor = 1;
 
@@ -277,11 +285,11 @@ public class MapMaker : MonoBehaviour {
 
     public void StartBattle()
     {
-        battleWindow = windowManager.Open((int)Windows.TestBattleWindow - 1, true) as TestBattleWindow;
-        //battleWindow.battleOverCall += BattleOver;
+        battleWindow = windowManager.Open((int)Windows.BattleWindow - 1, false) as BattleWindow;
+        battleWindow.battleOverCall += BattleOver;
 
-        battleWindow.StartBattle(Players, Enemies);
-        //battleWindow.UpdateCharUI();
+        battleWindow.StartBattle(Players, EnemySpawnData, floor);
+        battleWindow.UpdateCharUI();
 
         ToggleMovement(false);
     }
