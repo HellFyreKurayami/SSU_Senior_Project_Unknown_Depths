@@ -7,8 +7,14 @@ public class BattleWindow : GenericWindow {
 
     public static BattleWindow Instance { get; set; }
 
+    [System.Serializable]
+    public struct BattleSpawnGroups
+    {
+        [SerializeField] public BattleSpawnPoint[] SpawnPoints;
+    }
+
     [SerializeField]
-    private BattleSpawnPoint[] SpawnPoints;
+    private List<BattleSpawnGroups> SpawnGroups;
     [SerializeField]
     private GameObject spellPanel;
     [SerializeField]
@@ -47,14 +53,16 @@ public class BattleWindow : GenericWindow {
 
         for (int i = 0; i < c.Count; i++)
         {
-            ActiveBattleMembers.Add(SpawnPoints[i + 4].spawn(c[i]));
+            ActiveBattleMembers.Add(SpawnGroups[0].SpawnPoints[i].spawn(c[i]));
+            //ActiveBattleMembers.Add(SpawnPoints[i + 4].spawn(c[i]));
         }
 
         int inBattle = Random.Range(1, 5);
         for (int i = 0; i < inBattle; i++)
         {
             Enemy spawn = getEntityToSpawn(e[floor - 1].enemies);
-            ActiveBattleMembers.Add(SpawnPoints[i].spawn(spawn));
+            ActiveBattleMembers.Add(SpawnGroups[inBattle].SpawnPoints[i].spawn(spawn));
+            //ActiveBattleMembers.Add(SpawnPoints[i].spawn(spawn));
         }
 
         ActiveBattleMembers.Sort((x1, x2) => x1.Speed.CompareTo(x2.Speed));

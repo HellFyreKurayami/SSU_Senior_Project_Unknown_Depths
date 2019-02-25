@@ -297,6 +297,7 @@ public class MapMaker : MonoBehaviour {
     public void EndBattle()
     {
         battleWindow.Close();
+        
         ToggleMovement(true);
     }
 
