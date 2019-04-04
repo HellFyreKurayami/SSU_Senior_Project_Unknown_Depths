@@ -19,7 +19,7 @@ public class MapMaker : MonoBehaviour {
     [System.Serializable]
     public struct EnemySpawns
     {
-        [SerializeField] public List<Enemy> enemies;
+        [SerializeField] public List<Entity> enemies;
     }
 
     [Header("Map Dimensions")]
@@ -65,12 +65,13 @@ public class MapMaker : MonoBehaviour {
     public List<Entity> Players = null;
     //public List<Entity> Enemies = null;
     public List<EnemySpawns> EnemySpawnData;
-    
 
+    private Dictionary<int, string> gameMaps = new Dictionary<int, string>();
     public PreciseMap Map;
 
     private BattleWindow battleWindow;
     private FloorWindow floorWindow;
+    private ProgressWindow progressWindow;
     private int floor = 1;
 
     private int tempX;
@@ -93,8 +94,8 @@ public class MapMaker : MonoBehaviour {
         fowTileSprites = Resources.LoadAll<Sprite>(fowTexture.name);
 
         Map = new PreciseMap();
-        Create();
-        StartCoroutine(AddPlayer());
+        Create(false);
+        StartCoroutine(AddPlayer(false));
     }
 
     public void Shutdown()
@@ -102,19 +103,40 @@ public class MapMaker : MonoBehaviour {
         ClearMap();
     }
 
-    IEnumerator AddPlayer()
+    IEnumerator AddPlayer(bool revisit)
     {
         yield return new WaitForEndOfFrame();
-        CreatePlayer();
+        CreatePlayer(revisit);
     }
 	
-    public void Create()
+    public void Create(bool useSeed)
     {
-        Map.CreateMap(MapWidth, MapHeight);
-        //Debug.Log("Cave Created");
-        Map.CreateCave(UseSeed, Seed, caveErosion, roomThreshold, treasureChests);
+        string seed = "";
+        if (useSeed)
+        {
+            seed = Seed;
+        }
+        else
+        {
+            seed = Time.time.ToString();
+        }
+
+        Map.CreateMap(MapWidth + (5*floor - 1), MapHeight + (5 * floor - 1));
+        //Debug.Log(string.Format("Map Width: {0} | Map Height {1}", MapWidth + (5 * floor - 1), MapHeight + (5 * floor - 1)));
+        Map.CreateCave(seed, caveErosion, roomThreshold, treasureChests);
         CreateGrid();
         CenterMap(Map.caveEntranceTile.TileID);
+        gameMaps.Add(floor, seed);
+    }
+
+    private void Revisit(string seed)
+    {
+        Map.CreateMap(MapWidth + (5 * floor - 1), MapHeight + (5 * floor - 1));
+        //Debug.Log(string.Format("Map Width: {0} | Map Height {1}", MapWidth + (5 * floor - 1), MapHeight + (5 * floor - 1)));
+        //Debug.Log("Cave Created");
+        Map.CreateCave(seed, caveErosion, roomThreshold, 0);
+        CreateGrid();
+        CenterMap(Map.caveExitTile.TileID);
     }
 
     void CreateGrid()
@@ -168,7 +190,7 @@ public class MapMaker : MonoBehaviour {
         }
     }
 
-    public void CreatePlayer()
+    public void CreatePlayer(bool revisit)
     {
         player = Instantiate(playerPrefab);
         player.name = "Player";
@@ -182,13 +204,31 @@ public class MapMaker : MonoBehaviour {
         var moveScript = Camera.main.GetComponent<MoveCamera>();
         moveScript.target = player;
 
-        controller.MoveTo(Map.caveEntranceTile.TileID);
+        if (revisit)
+        {
+            controller.MoveTo(Map.caveExitTile.TileID);
+        }
+        else
+        {
+            controller.MoveTo(Map.caveEntranceTile.TileID);
+        }
 
         //Display Floor Stats
         floorWindow = windowManager.Open((int)Windows.FloorWindow - 1, false) as FloorWindow;
         floorWindow.UpdateFloor(floor);
+
+        foreach (Entity p in Players)
+        {
+            if (!System.IO.File.Exists(Application.persistentDataPath + "/PlayerInfo/" + p.EntityName + ".dat"))
+            {
+                p.SaveData();
+                //Debug.Log(string.Format("{0} data file has been created", p.EntityName));
+            }
+        }
     }
 
+    bool hasMoved = false;
+    bool yn = false;
     void TileActionCallback(int type)
     {
         //Debug.Log("On Tile Type: " + type);
@@ -196,10 +236,23 @@ public class MapMaker : MonoBehaviour {
         VisitTile(tileID);
         if (player.GetComponent<MapMovement>().currentTile.Equals(Map.caveExitTile.TileID))
         {
-            MapHeight += 5;
-            MapWidth += 5;
-            floor++;
-            Reset();
+            if (hasMoved)
+            {
+                progressWindow = windowManager.Open((int)Windows.ProgressWindow - 1, false) as ProgressWindow;
+                progressWindow.NextOrPrevious(true);
+                yn = true;
+                ToggleMovement(false);
+            }
+        }
+        else if (player.GetComponent<MapMovement>().currentTile.Equals(Map.caveEntranceTile.TileID) && floor != 1)
+        {
+            if (hasMoved)
+            {
+                progressWindow = windowManager.Open((int)Windows.ProgressWindow - 1, false) as ProgressWindow;
+                progressWindow.NextOrPrevious(false);
+                yn = false;
+                ToggleMovement(false);
+            }
         }
         else if(type == 20) // Treasure Chest
         {
@@ -210,10 +263,50 @@ public class MapMaker : MonoBehaviour {
             var chance = Random.Range(0, 1f);
             if(chance < 0.3f && !player.GetComponent<MapMovement>().currentTile.Equals(Map.caveEntranceTile.TileID))
             {
-                Debug.Log("Battle Starting");
+                //Debug.Log("Battle Starting");
                 StartBattle();
             }
+            hasMoved = true;
         }
+    }
+
+    public void Proceed()
+    {
+        if (yn)
+        {
+            if (gameMaps.ContainsKey(floor + 1))
+            {
+                floor++;
+                Revisit(gameMaps[floor]);
+                StartCoroutine(AddPlayer(false));
+                //Debug.Log("Revisiting the Next Floor. Seed: " + gameMaps[floor]);
+            }
+            else
+            {
+                floor++;
+                Reset();
+                //Debug.Log("Going to Next Floor. Seed: " + gameMaps[floor]);
+            }
+        }
+        else
+        {
+            floor--;
+            Revisit(gameMaps[floor]);
+            StartCoroutine(AddPlayer(true));
+            //Debug.Log("Going to Previous Floor Seed: " + gameMaps[floor]);
+            ToggleMovement(true);
+            progressWindow.Close();
+        }
+        hasMoved = false;
+        ToggleMovement(true);
+        progressWindow.Close();
+    }
+
+    public void Stay()
+    {
+        hasMoved = false;
+        ToggleMovement(true);
+        progressWindow.Close();
     }
 
     void ClearMap()
@@ -283,6 +376,8 @@ public class MapMaker : MonoBehaviour {
         }
     }
 
+    //Battle Functions
+
     public void StartBattle()
     {
         battleWindow = windowManager.Open((int)Windows.BattleWindow - 1, false) as BattleWindow;
@@ -297,7 +392,6 @@ public class MapMaker : MonoBehaviour {
     public void EndBattle()
     {
         battleWindow.Close();
-        
         ToggleMovement(true);
     }
 
@@ -309,16 +403,19 @@ public class MapMaker : MonoBehaviour {
 
     private void BattleOver(bool playerWin)
     {
-        EndBattle();
         if (!playerWin)
         {
             StartCoroutine(ExitGame());
+        }
+        else
+        {
+            EndBattle();
         }
     }
 
     IEnumerator ExitGame()
     {
         yield return new WaitForSeconds(5);
-        windowManager.Open((int)Windows.StartWindow - 1);
+        windowManager.Open((int)Windows.StartWindow - 1, true);
     }
 }

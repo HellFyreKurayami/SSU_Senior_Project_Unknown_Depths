@@ -15,12 +15,12 @@ public class BattleWindow : GenericWindow {
 
     [SerializeField]
     private List<BattleSpawnGroups> SpawnGroups;
-    [SerializeField]
-    private GameObject spellPanel;
+    //[SerializeField]
+    //private GameObject spellPanel;
     [SerializeField]
     private Button[] actionButtons;
-    [SerializeField]
-    private Button button;
+    /*[SerializeField]
+    private Button button;*/
     [SerializeField]
     public Text[] entityInfo;
     [SerializeField]
@@ -34,6 +34,11 @@ public class BattleWindow : GenericWindow {
     public delegate void BattleOver(bool playerWin);
     public BattleOver battleOverCall;
 
+    private SpellWindow spellWindow;
+    private TargetWindow targetWindow;
+
+    //Used only if the player wins the battle
+    private int EXP = 0;
 
     private void Start()
     {
@@ -45,52 +50,51 @@ public class BattleWindow : GenericWindow {
         {
             Instance = this;
         }
-        spellPanel.SetActive(false);
+        //spellPanel.SetActive(false);
     }
 
     public void StartBattle(List<Entity> c, List<MapMaker.EnemySpawns> e, int floor)
     {
+        foreach (Entity pm in c)
+        {
+            if (!System.IO.File.Exists(Application.persistentDataPath + "/PlayerInfo/" + pm.EntityName + ".dat"))
+            {
+                pm.SaveData();
+                //Debug.Log(string.Format("{0} data file has been created", pm.EntityName));
+            }
+            //Debug.Log(Application.persistentDataPath);
+            pm.LoadData();
+        }
+        int activeParty = c.Count > 4 ? 4 : c.Count;
 
-        for (int i = 0; i < c.Count; i++)
+        c.Sort((x1, x2) => x1.position.CompareTo(x2.position));
+
+        for (int i = 0; i < activeParty; i++)
         {
             ActiveBattleMembers.Add(SpawnGroups[0].SpawnPoints[i].spawn(c[i]));
             //ActiveBattleMembers.Add(SpawnPoints[i + 4].spawn(c[i]));
         }
 
-        int inBattle = Random.Range(1, 5);
+        int inBattle = Random.Range(1, 3);
         for (int i = 0; i < inBattle; i++)
         {
-            Enemy spawn = getEntityToSpawn(e[floor - 1].enemies);
+            Entity spawn = getEntityToSpawn(e[floor - 1].enemies);
             ActiveBattleMembers.Add(SpawnGroups[inBattle].SpawnPoints[i].spawn(spawn));
             //ActiveBattleMembers.Add(SpawnPoints[i].spawn(spawn));
         }
 
+        currentTurn = 0;
         ActiveBattleMembers.Sort((x1, x2) => x1.Speed.CompareTo(x2.Speed));
         ActiveBattleMembers.Reverse();
-        Debug.Log(string.Format("Current Turn: {0} with {1} as the turn entity", currentTurn, GetCurrentCharacter().EntityName));
-        UpdateAction(string.Format("What Will {0} Do?", GetCurrentCharacter().EntityName));
+        UpdateAction(string.Format("Battle has started!"));
         UpdateCharUI();
-        spellPanel.SetActive(false);
+        //spellPanel.SetActive(false);
+        Invoke("NextAct", 3);
     }
 
-    private Enemy getEntityToSpawn(List<Enemy> enemies)
+    private Entity getEntityToSpawn(List<Entity> enemies)
     {
         return enemies[Random.Range(0, enemies.Count)];
-    }
-
-    private void Update()
-    {
-        if (Input.GetMouseButtonDown(0))
-        {
-            //This may be useless, will change later
-            Ray r = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit2D hitInfo = Physics2D.Raycast(r.origin, r.direction);
-            if (hitInfo.collider != null && hitInfo.collider.CompareTag("Entity"))
-            {
-                Debug.Log("You Clicked an Entity");
-                SelectCharacter(hitInfo.collider.GetComponent<Entity>());
-            }
-        }
     }
 
     private void NextTurn()
@@ -107,59 +111,77 @@ public class BattleWindow : GenericWindow {
 
     private void NextAct()
     {
-        List<Entity> c = ActiveBattleMembers.FindAll(x => x.Chara.Equals(CharaType.PLAYER));
+        List<Entity> c = ActiveBattleMembers.FindAll(x => x.Chara.Equals(CharaType.PLAYER) && x.alive);
         List<Entity> e = ActiveBattleMembers.FindAll(x => x.Chara.Equals(CharaType.ENEMY));
-        if (c.Count > 0 && e.Count > 0)
+        if (c.Count == 0 || e.Count == 0)
         {
-            NextTurn();
-            Debug.Log(string.Format("Current Turn: {0} with {1} as the turn entity", currentTurn, GetCurrentCharacter().EntityName));
-        }
-        else
-        {
+            //NextTurn();
+            //Debug.Log(string.Format("Current Turn: {0} with {1} as the turn entity", currentTurn, GetCurrentCharacter().EntityName));
+            //Destroy(Instance);
+            //Debug.Log("Battle Has Ended");
             if (c.Count == 0)
             {
-                Debug.Log("Battle Has Ended");
+                for (int i = 0; i < ActiveBattleMembers.Count; i++)
+                {
+                    Destroy(ActiveBattleMembers[i].gameObject);
+                }
+                ActiveBattleMembers.Clear();
                 UpdateAction("And they were never heard from again...");
                 battleOverCall(false);
             }
             else if (e.Count == 0)
             {
-                Debug.Log("Battle Has Ended");
-                battleOverCall(true);
+                StartCoroutine(PlayerWin());
             }
-        }
-
-        if (GetCurrentCharacter().Chara.Equals(CharaType.PLAYER))
-        {
-            ToggleActionState(true);
-            BuildSpellList(GetCurrentCharacter().Skills);
-            UpdateAction(string.Format("What Will {0} Do?", GetCurrentCharacter().EntityName));
         }
         else
         {
-            ToggleActionState(false);
-            StartCoroutine(PerformAct());
-        }
+            if (GetCurrentCharacter().Chara.Equals(CharaType.PLAYER))
+            {
+                firstSelected = actionButtons[0].gameObject;
+                eventSystem.SetSelectedGameObject(firstSelected);
+                if (GetCurrentCharacter().alive)
+                {
+                    ToggleActionState(true);
+                    //BuildSpellList(GetCurrentCharacter().Skills);
+                    UpdateAction(string.Format("What Will {0} Do?", GetCurrentCharacter().EntityName));
+                }
+                else
+                {
+                    NextTurn();
+                    NextAct();
+                }
+            }
+            else
+            {
+                //Debug.Log("Should be an enemy turn: " + currentTurn);
+                ToggleActionState(false);
+                StartCoroutine(PerformAct());
+            }
+        }        
     }
 
-    IEnumerator PerformAct()
-    {
-        //yield return new WaitForSeconds(3.0f);
-        if (ActiveBattleMembers[currentTurn].CurrentHealth > 0)
-        {
-            GetCurrentCharacter().GetComponent<Enemy>().Act();
-        }
-        UpdateCharUI();
-        yield return new WaitForSeconds(3.0f);
-        NextAct();
-    }
+    // Player Controllers
 
     public void SelectCharacter(Entity e)
     {
         if (playerAttacking)
         {
             DoAttack(GetCurrentCharacter(), e);
+            targetWindow.Close();
+            ToggleActionState(false);
             playerAttacking = false;
+            if(GetCurrentCharacter().CurrentMagicPoints != GetCurrentCharacter().MaxMagicPoints){
+                if(GetCurrentCharacter().CurrentMagicPoints + 3 > GetCurrentCharacter().MaxMagicPoints)
+                {
+                    GetCurrentCharacter().CurrentMagicPoints += 3;
+                }
+                else
+                {
+                    GetCurrentCharacter().CurrentMagicPoints = GetCurrentCharacter().MaxMagicPoints;
+                }
+            }
+            NextTurn();
             Invoke("NextAct", 3);
             //NextAct();
         }
@@ -167,13 +189,19 @@ public class BattleWindow : GenericWindow {
         {
             if (GetCurrentCharacter().CastSpell(playerSelected, e))
             {
+                targetWindow.Close();
                 UpdateCharUI();
+                ToggleActionState(false);
                 Invoke("NextAct", 3);
+                NextTurn();
+                playerSelected = null;
                 //NextAct();
             }
             else
             {
-                Debug.LogWarning("ERROR: Not Enough Mana to Cast " + playerSelected.SpellName);
+                UpdateAction("Not Enough Mana to Cast " + playerSelected.SpellName);
+                //Debug.LogWarning("ERROR: Not Enough Mana to Cast " + playerSelected.SpellName);
+                StartCoroutine(ResetAction(string.Format("What Will {0} Do?", GetCurrentCharacter().EntityName)));
             }
         }
         new WaitForSeconds(2);
@@ -184,9 +212,12 @@ public class BattleWindow : GenericWindow {
         caster.CastSpell(caster.Skills[0], target);
     }
 
+    // Enemy Controllers
+
     public Entity GetRandomPlayer()
     {
-        List<Entity> c = ActiveBattleMembers.FindAll(x => x.Chara.Equals(CharaType.PLAYER));
+        List<Entity> c = ActiveBattleMembers.FindAll(x => x.Chara.Equals(CharaType.PLAYER) && x.alive);
+        //Debug.Log(string.Format("This List has {0} elements", c.Count));
         return c[Random.Range(0, c.Count - 1)];
     }
 
@@ -210,6 +241,23 @@ public class BattleWindow : GenericWindow {
         return ActiveBattleMembers[currentTurn];
     }
 
+    IEnumerator PerformAct()
+    {
+        //yield return new WaitForSeconds(3.0f);
+        if (ActiveBattleMembers[currentTurn].alive &&
+            ActiveBattleMembers[currentTurn].Chara.Equals(CharaType.ENEMY))
+        {
+            GetCurrentCharacter().GetComponent<Enemy>().Act();
+            //GetCurrentCharacter().Act();
+        }
+        UpdateCharUI();
+        yield return new WaitForSeconds(3.0f);
+        NextTurn();
+        NextAct();
+    }
+
+    //UI UPDATES
+
     public void UpdateCharUI()
     {
         List<Entity> c = ActiveBattleMembers.FindAll(x => x.Chara.Equals(CharaType.PLAYER));
@@ -220,32 +268,55 @@ public class BattleWindow : GenericWindow {
         }
     }
 
-    //UI UPDATES
-
     public void UpdateAction(string s)
     {
         action.text = s;
     }
 
-    public void ToggleSpellPanel(bool state)
+    IEnumerator ResetAction(string s)
+    {
+        yield return new WaitForSeconds(1.5f);
+        action.text = s;
+    }
+
+    /*public void ToggleSpellPanel(bool state)
     {
         spellPanel.SetActive(state);
         if (state == true)
         {
             BuildSpellList(GetCurrentCharacter().Skills);
         }
+    }*/
+
+    public void OpenSkillWindow(bool fromTarget)
+    {
+        if (fromTarget)
+        {
+            targetWindow.Close();
+        }
+        ToggleActionState(false);
+        spellWindow = GenericWindow.manager.Open((int)Windows.SpellWindow - 1, false) as SpellWindow;
+        spellWindow.BuildSpellList(GetCurrentCharacter().Skills);
     }
+
+    public void OpenTargetWindow()
+    {
+        targetWindow = GenericWindow.manager.Open((int)Windows.TargetWindow - 1, false) as TargetWindow;
+        targetWindow.CreateTargetList(ActiveBattleMembers.FindAll(x => x.Chara == CharaType.ENEMY));
+    }
+
+
 
     public void ToggleActionState(bool state)
     {
-        ToggleSpellPanel(state);
+        //ToggleSpellPanel(state);
         foreach (Button b in actionButtons)
         {
             b.interactable = state;
         }
     }
 
-    public void BuildSpellList(List<Skill> spells)
+    /*public void BuildSpellList(List<Skill> spells)
     {
         //Remove visable spells in spell panel
         if (spellPanel.transform.childCount > 0)
@@ -265,17 +336,86 @@ public class BattleWindow : GenericWindow {
                 spellButton.onClick.AddListener(() => SelectSpell(s));
             }
         }
+    }*/
+
+    //End of Battle
+
+    public void GiveEXP(int exp)
+    {
+        EXP += exp;
     }
+
+    IEnumerator PlayerWin()
+    {
+        UpdateAction("You have won the battle!"); // Initial Statement
+        yield return new WaitForSeconds(1.0f);
+        if (ActiveBattleMembers[0].alive)
+        {
+            UpdateAction(string.Format("{0} has gained {1} EXP", ActiveBattleMembers[0].EntityName, EXP)); // Position 0 EXP Gain
+            ActiveBattleMembers[0].experience += EXP;
+            yield return new WaitForSeconds(1.0f);
+        }
+        ActiveBattleMembers[0].SaveData();
+        if (ActiveBattleMembers[1].alive)
+        {
+            UpdateAction(string.Format("{0} has gained {1} EXP", ActiveBattleMembers[1].EntityName, EXP)); // Position 1 EXP Gain
+            ActiveBattleMembers[1].experience += EXP;
+            yield return new WaitForSeconds(1.0f);
+        }
+        ActiveBattleMembers[1].SaveData();
+        if (ActiveBattleMembers[2].alive)
+        {
+            UpdateAction(string.Format("{0} has gained {1} EXP", ActiveBattleMembers[2].EntityName, EXP)); // Position 2 EXP Gain
+            ActiveBattleMembers[2].experience += EXP;
+            yield return new WaitForSeconds(1.0f);
+        }
+        ActiveBattleMembers[2].SaveData();
+        if (ActiveBattleMembers[3].alive)
+        {
+            UpdateAction(string.Format("{0} has gained {1} EXP", ActiveBattleMembers[3].EntityName, EXP)); // Position 3 EXP Gain
+            ActiveBattleMembers[3].experience += EXP;
+            yield return new WaitForSeconds(1.0f);
+        }
+        ActiveBattleMembers[3].SaveData();
+        /*if (ActiveBattleMembers[4].alive)
+        {
+            ActiveBattleMembers[4].experience += (int)(EXP*0.6);
+            ActiveBattleMembers[4].SaveData();
+            yield return new WaitForSeconds(1.0f);
+        }
+        if (ActiveBattleMembers[5].alive)
+        {
+            ActiveBattleMembers[5].experience += (int)(EXP * 0.6);
+            ActiveBattleMembers[5].SaveData();
+            yield return new WaitForSeconds(1.0f);
+        }*/
+        //Item / Gold drops
+        yield return new WaitForSeconds(1.0f);
+        for (int i = 0; i < ActiveBattleMembers.Count; i++)
+        {
+            Destroy(ActiveBattleMembers[i].gameObject);
+        }
+        EXP = 0;
+        ActiveBattleMembers.Clear();
+        battleOverCall(true);
+
+    }
+
+    // Boolean Controllers
 
     public void SelectAttack()
     {
         playerSelected = null;
+        //ToggleSpellPanel(false);
         playerAttacking = true;
+        OpenTargetWindow();
     }
 
-    private void SelectSpell(Skill spell)
+    public void SelectSpell(Skill spell)
     {
         playerSelected = spell;
         playerAttacking = false;
+        spellWindow.Close();
+        OpenTargetWindow();
     }
 }

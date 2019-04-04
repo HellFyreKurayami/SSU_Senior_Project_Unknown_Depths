@@ -64,7 +64,7 @@ public class PreciseMap
     {
         get
         {
-            return mapTiles.LastOrDefault(t => t.AutoTileID == (int)TilePiece.MONSTER);
+            return mapTiles.FirstOrDefault(t => t.AutoTileID == (int)TilePiece.TREE);
         }
     }
 
@@ -123,17 +123,10 @@ public class PreciseMap
         }
     }
 
-    public void CreateCave(bool useSeed, string newSeed, int caveErode, int roomThresh, int chests)
+    public void CreateCave(string newSeed, int caveErode, int roomThresh, int chests)
     {
-        var seed = "";
-        if (useSeed)
-        {
-            seed = newSeed;
-        }
-        else
-        {
-            seed = Time.time.ToString();
-        }
+        var seed = newSeed;
+        
 
         System.Random psuRand = new System.Random(seed.GetHashCode());
 
@@ -185,7 +178,14 @@ public class PreciseMap
         for(var d = 0; d < doors; d++)
         {
             PreciseTileChecker tile = renderedTiles[UnityEngine.Random.Range(0, renderedTiles.Count)];
-            mapTiles[col * tile.tileX + tile.tileY].AutoTileID = (int)TilePiece.MONSTER;
+            if(d == 0)
+            {
+                mapTiles[col * tile.tileX + tile.tileY].AutoTileID = (int)TilePiece.MONSTER;
+            }
+            else
+            {
+                mapTiles[col * tile.tileX + tile.tileY].AutoTileID = (int)TilePiece.TREE;
+            }
             renderedTiles.Remove(tile);
         }
 

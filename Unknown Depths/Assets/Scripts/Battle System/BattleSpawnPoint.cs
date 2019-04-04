@@ -9,4 +9,10 @@ public class BattleSpawnPoint : MonoBehaviour {
         Entity e = Instantiate<Entity>(toSpawn, this.transform);
         return e;
     }
+
+    public Player spawn(Player toSpawn)
+    {
+        Player e = Instantiate<Player>(toSpawn, this.transform);
+        return e;
+    }
 }

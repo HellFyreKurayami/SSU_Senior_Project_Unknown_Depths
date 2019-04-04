@@ -16,6 +16,7 @@ public class Player : MonoBehaviour {
 
     private MapMovement moveController;
     private Animator animator;
+    public bool hasMoved = false;
 	// Use this for initialization
 	void Start () {
         moveController = GetComponent<MapMovement>();
@@ -59,6 +60,7 @@ public class Player : MonoBehaviour {
         if(dir.x != 0 || dir.y != 0)
         {
             moveController.MoveInDir(dir);
+            hasMoved = true;
         }
     }
 }

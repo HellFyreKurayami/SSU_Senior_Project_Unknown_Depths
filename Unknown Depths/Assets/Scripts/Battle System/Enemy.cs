@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class Enemy : Entity {
 
-    List<Skill> HealingSkills = new List<Skill>();
+    public List<Skill> HealingSkills = new List<Skill>();
+    public int droppedEXP;
 
     public void Act()
     {
@@ -42,8 +43,10 @@ public class Enemy : Entity {
 
     public override void Die()
     {
-        base.Die();
+        BattleWindow.Instance.GiveEXP(droppedEXP);
         BattleWindow.Instance.UpdateAction(string.Format("{0} has been slain!", this.EntityName));
         BattleWindow.Instance.ActiveBattleMembers.Remove(this);
+        Destroy(this.gameObject);
+        base.Die();
     }
 }
