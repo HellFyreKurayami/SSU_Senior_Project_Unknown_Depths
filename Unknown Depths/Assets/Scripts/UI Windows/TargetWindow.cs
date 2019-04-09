@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class TargetWindow : GenericWindow
@@ -9,10 +10,12 @@ public class TargetWindow : GenericWindow
     private GameObject targetPanel;
     [SerializeField]
     private Button button;
+    [SerializeField]
+    private Text targetText;
 
     void Update()
     {
-        if (Input.GetKey(KeyCode.Backspace))
+        if (Input.GetButtonDown("Cancel"))
         {
             if(BattleWindow.Instance.playerSelected != null)
             {
@@ -21,6 +24,7 @@ public class TargetWindow : GenericWindow
             else
             {
                 BattleWindow.Instance.ToggleActionState(true);
+                BattleWindow.Instance.SelectButton(false);
                 Close();
             }
         }
@@ -35,13 +39,21 @@ public class TargetWindow : GenericWindow
                 Destroy(b.gameObject);
             }
         }
-
-        bool selected = false;
+        
         foreach (Entity e in targets)
         {
             Button targetButton = Instantiate<Button>(button, targetPanel.transform);
             targetButton.GetComponentInChildren<Text>().text = e.EntityName;
             targetButton.onClick.AddListener(() => BattleWindow.Instance.SelectCharacter(e));
+            EventTrigger trigger = targetButton.gameObject.AddComponent<EventTrigger>();
+            var hover = new EventTrigger.Entry();
+            var select = new EventTrigger.Entry();
+            hover.eventID = EventTriggerType.PointerEnter;
+            select.eventID = EventTriggerType.Select;
+            hover.callback.AddListener((S) => DisplayInformation(string.Format("{0} | {1} / {2} HP", e.EntityName, e.CurrentHealth, e.MaxHealth)));
+            select.callback.AddListener((S) => DisplayInformation(string.Format("{0} | {1} / {2} HP", e.EntityName, e.CurrentHealth, e.MaxHealth)));
+            trigger.triggers.Add(hover);
+            trigger.triggers.Add(select);
             var nav = targetButton.navigation;
             nav.mode = Navigation.Mode.Automatic;
             targetButton.navigation = nav;
@@ -49,6 +61,7 @@ public class TargetWindow : GenericWindow
 
         Button[] temp = targetPanel.transform.GetComponentsInChildren<Button>();
         firstSelected = temp[0].gameObject;
+        eventSystem.SetSelectedGameObject(firstSelected);
     }
 
     public override void Close()
@@ -61,5 +74,10 @@ public class TargetWindow : GenericWindow
             }
         }
         base.Close();
+    }
+
+    public void DisplayInformation(string text)
+    {
+        targetText.text = text;
     }
 }

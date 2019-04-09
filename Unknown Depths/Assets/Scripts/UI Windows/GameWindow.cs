@@ -12,6 +12,15 @@ public class GameWindow : GenericWindow {
         base.Awake();
     }
 
+    private void Update()
+    {
+        if (Input.GetButton("Menu"))
+        {
+            MapMaker.Instance.ToggleMovement(false);
+            manager.Open((int)Windows.MenuWindow - 1, false);
+        }
+    }
+
     public override void Open()
     {
         base.Open();

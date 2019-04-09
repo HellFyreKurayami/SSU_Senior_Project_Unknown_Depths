@@ -26,6 +26,13 @@ public class Entity : MonoBehaviour {
     public CharaType Chara;
     public List<Element> Element;
     public List<Skill> Skills;
+    
+    /*private ShakeEffect shake;
+
+    void Awake()
+    {
+        shake = GetComponent<ShakeEffect>();
+    }*/
 
     public void OnTurn()
     {
@@ -55,9 +62,25 @@ public class Entity : MonoBehaviour {
         return cast;
     }
 
+    public bool CastAOE(Skill s, List<Entity> e)
+    {
+        bool cast = CurrentMagicPoints >= s.Cost;
+
+        if (cast)
+        {
+            //Uncomment this once I add particle effects. for now just need the spell to deal damage
+            //Skill toCast = Instantiate<Skill>(s, transform.position, Quaternion.identity);
+            CurrentMagicPoints -= s.Cost;
+            s.CastAOE(this, e);
+        }
+
+        return cast;
+    }
+
     public void Damage(int amt)
     {
         CurrentHealth = Mathf.Max(CurrentHealth - amt, 0);
+        //shake.Shake(this.GetComponent<RectTransform>(), 1.0f, 2.0f);
         if (CurrentHealth == 0)
         {
             Die();
@@ -66,7 +89,7 @@ public class Entity : MonoBehaviour {
 
     public void Heal(int amt)
     {
-        CurrentHealth += amt;
+        CurrentHealth = Mathf.Min(CurrentHealth + amt, MaxHealth);
     }
 
     public bool alive
@@ -79,14 +102,33 @@ public class Entity : MonoBehaviour {
 
     public virtual void Die()
     {
-        //Debug.LogFormat("{0} has died...", EntityName);
-
-        Destroy(this.gameObject);
+        Debug.LogFormat("{0} has died.", EntityName);
+        for(int i = 0; i<BattleWindow.Instance.ActiveBattleMembers.Count; i++)
+        {
+            if (BattleWindow.Instance.ActiveBattleMembers[i].Equals(this))
+            {
+                if(BattleWindow.Instance.currentTurn > i)
+                {
+                    BattleWindow.Instance.currentTurn--;
+                    break;
+                }
+            }
+        }
     }
 
     public virtual void CheckLevelUp()
     {
+        //Solely for PartyMembers
+    }
 
+    public virtual void LevelUp()
+    {
+        //Solely for PartyMembers
+    }
+
+    public virtual void Respec()
+    {
+        //Solely for Enemy
     }
 
     public void SaveData()

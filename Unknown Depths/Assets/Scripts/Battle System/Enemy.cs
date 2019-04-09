@@ -40,13 +40,23 @@ public class Enemy : Entity {
         return s[Random.Range(1, s.Count - 1)];
     }
 
+    public override void Respec()
+    {
+        base.Respec();
+        List<Entity> temp = BattleWindow.Instance.ActiveBattleMembers.FindAll(x => x.Chara == CharaType.PLAYER);
+        temp.Sort((x1, x2) => x1.level.CompareTo(x2.level));
+        if(temp[0].level > level)
+        {
+
+        }
+    }
 
     public override void Die()
     {
         BattleWindow.Instance.GiveEXP(droppedEXP);
         BattleWindow.Instance.UpdateAction(string.Format("{0} has been slain!", this.EntityName));
         BattleWindow.Instance.ActiveBattleMembers.Remove(this);
-        Destroy(this.gameObject);
         base.Die();
+        Destroy(this.gameObject);
     }
 }

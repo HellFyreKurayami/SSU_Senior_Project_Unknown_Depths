@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
+using System.IO;
 
 ///<summary>
 ///Map Maker Class
@@ -16,6 +18,8 @@ using UnityEngine;
 
 public class MapMaker : MonoBehaviour {
 
+    public static MapMaker Instance { get; set; }
+
     [System.Serializable]
     public struct EnemySpawns
     {
@@ -25,11 +29,6 @@ public class MapMaker : MonoBehaviour {
     [Header("Map Dimensions")]
     public int MapWidth = 20;
     public int MapHeight = 20;
-
-    [Space]
-    [Header("Map Seed **Optional**")]
-    public bool UseSeed = false;
-    public string Seed = "";
 
     [Space]
     [Header("Visualize Map")]
@@ -65,6 +64,7 @@ public class MapMaker : MonoBehaviour {
     public List<Entity> Players = null;
     //public List<Entity> Enemies = null;
     public List<EnemySpawns> EnemySpawnData;
+    public List<Entity> Bosses;
 
     private Dictionary<int, string> gameMaps = new Dictionary<int, string>();
     public PreciseMap Map;
@@ -87,14 +87,31 @@ public class MapMaker : MonoBehaviour {
             return GenericWindow.manager;
         }
     }
-    
+
+    private void Start()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this.gameObject);
+        }
+        else
+        {
+            Instance = this;
+        }
+        Directory.Delete(Application.persistentDataPath + "/PlayerInfo/", true);
+        foreach (Entity p in Players)
+        {
+            p.SaveData();
+        }
+    }
+
     public void Reset()
     {
         caveTileSprites = Resources.LoadAll<Sprite>(MapTexture.name);
         fowTileSprites = Resources.LoadAll<Sprite>(fowTexture.name);
 
         Map = new PreciseMap();
-        Create(false);
+        Create();
         StartCoroutine(AddPlayer(false));
     }
 
@@ -109,18 +126,9 @@ public class MapMaker : MonoBehaviour {
         CreatePlayer(revisit);
     }
 	
-    public void Create(bool useSeed)
+    public void Create()
     {
-        string seed = "";
-        if (useSeed)
-        {
-            seed = Seed;
-        }
-        else
-        {
-            seed = Time.time.ToString();
-        }
-
+        string seed = Time.time.ToString();
         Map.CreateMap(MapWidth + (5*floor - 1), MapHeight + (5 * floor - 1));
         //Debug.Log(string.Format("Map Width: {0} | Map Height {1}", MapWidth + (5 * floor - 1), MapHeight + (5 * floor - 1)));
         Map.CreateCave(seed, caveErosion, roomThreshold, treasureChests);
@@ -216,15 +224,6 @@ public class MapMaker : MonoBehaviour {
         //Display Floor Stats
         floorWindow = windowManager.Open((int)Windows.FloorWindow - 1, false) as FloorWindow;
         floorWindow.UpdateFloor(floor);
-
-        foreach (Entity p in Players)
-        {
-            if (!System.IO.File.Exists(Application.persistentDataPath + "/PlayerInfo/" + p.EntityName + ".dat"))
-            {
-                p.SaveData();
-                //Debug.Log(string.Format("{0} data file has been created", p.EntityName));
-            }
-        }
     }
 
     bool hasMoved = false;
@@ -261,10 +260,11 @@ public class MapMaker : MonoBehaviour {
         else
         {
             var chance = Random.Range(0, 1f);
-            if(chance < 0.3f && !player.GetComponent<MapMovement>().currentTile.Equals(Map.caveEntranceTile.TileID))
+            if(chance < 0.15f && !player.GetComponent<MapMovement>().currentTile.Equals(Map.caveEntranceTile.TileID))
             {
                 //Debug.Log("Battle Starting");
-                StartBattle();
+                MapContainer.SetActive(false);
+                StartBattle(false);
             }
             hasMoved = true;
         }
@@ -283,8 +283,15 @@ public class MapMaker : MonoBehaviour {
             }
             else
             {
-                floor++;
-                Reset();
+                if(floor == 10)
+                {
+                    StartBattle(true);
+                }
+                else
+                {
+                    floor++;
+                    Reset();
+                }
                 //Debug.Log("Going to Next Floor. Seed: " + gameMaps[floor]);
             }
         }
@@ -378,13 +385,20 @@ public class MapMaker : MonoBehaviour {
 
     //Battle Functions
 
-    public void StartBattle()
+    public void StartBattle(bool boss)
     {
         battleWindow = windowManager.Open((int)Windows.BattleWindow - 1, false) as BattleWindow;
         battleWindow.battleOverCall += BattleOver;
 
-        battleWindow.StartBattle(Players, EnemySpawnData, floor);
-        battleWindow.UpdateCharUI();
+        if (boss)
+        {
+            battleWindow.StartBattleBoss(Players, Bosses, (floor/10));
+        }
+        else
+        {
+            battleWindow.StartBattle(Players, EnemySpawnData, floor);
+            battleWindow.UpdateCharUI();
+        }
 
         ToggleMovement(false);
     }
@@ -395,8 +409,9 @@ public class MapMaker : MonoBehaviour {
         ToggleMovement(true);
     }
 
-    private void ToggleMovement(bool state)
+    public void ToggleMovement(bool state)
     {
+        player.GetComponent<Player>().isActive = state;
         player.GetComponent<MapMovement>().enabled = state;
         Camera.main.GetComponent<MoveCamera>().enabled = state;
     }
@@ -405,17 +420,27 @@ public class MapMaker : MonoBehaviour {
     {
         if (!playerWin)
         {
-            StartCoroutine(ExitGame());
+            StartCoroutine(ExitGame(false));
         }
         else
         {
+            if(floor%10 == 0)
+            {
+                StartCoroutine(ExitGame(true));
+            }
+            MapContainer.SetActive(true);
             EndBattle();
         }
     }
 
-    IEnumerator ExitGame()
+    IEnumerator ExitGame(bool win)
     {
+        gameMaps.Clear();
         yield return new WaitForSeconds(5);
-        windowManager.Open((int)Windows.StartWindow - 1, true);
+        if (win)
+        {
+            windowManager.Open((int)Windows.CreditsWindow - 1, true);
+        }
+        windowManager.Open((int)Windows.CreditsWindow - 1, true);
     }
 }

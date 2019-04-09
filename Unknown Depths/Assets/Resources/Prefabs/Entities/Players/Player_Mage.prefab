@@ -8,7 +8,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4601509223139536}
+  - component: {fileID: 7340206413126192055}
   - component: {fileID: 114934871913682618}
   - component: {fileID: 212045598115387252}
   - component: {fileID: 61129481955911226}
@@ -19,8 +19,8 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4601509223139536
-Transform:
+--- !u!224 &7340206413126192055
+RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -33,6 +33,11 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0.2, y: 0.2}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &114934871913682618
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -49,23 +54,38 @@ MonoBehaviour:
   experience: 0
   level: 1
   position: 2
-  CurrentHealth: 125
-  MaxHealth: 125
-  CurrentMagicPoints: 25
-  MaxMagicPoints: 25
-  PhysAttack: 50
-  PhysDefense: 35
-  MagAttack: 25
-  MagDefense: 20
-  Speed: 7
+  CurrentHealth: 140
+  MaxHealth: 140
+  CurrentMagicPoints: 51
+  MaxMagicPoints: 51
+  PhysAttack: 24
+  PhysDefense: 12
+  MagAttack: 61
+  MagDefense: 18
+  Speed: 51
   Chara: 1
   Element: 
   Skills:
   - {fileID: 114969866201547154, guid: 99aa989312c1cc54d897639e225f6113, type: 3}
-  - {fileID: 114426119367828180, guid: 74eadc340639bf945bdfb44691be35f0, type: 3}
   - {fileID: 114426119367828180, guid: e667ff9fea7324c4fb54f92aed30bae9, type: 3}
-  - {fileID: 114426119367828180, guid: 9dd0ee1d2f5a7db46823348c14228488, type: 3}
+  - {fileID: 114426119367828180, guid: 5d0586be8de09d741af8ac931e0f3afc, type: 3}
+  - {fileID: 114426119367828180, guid: c1f482d77ed5bc045a2e8677026460cc, type: 3}
+  - {fileID: 114426119367828180, guid: 74eadc340639bf945bdfb44691be35f0, type: 3}
+  - {fileID: 114426119367828180, guid: c831a02159e95774dac06457f02428dc, type: 3}
+  - {fileID: 114426119367828180, guid: ea384adc98a798847af62fcf8c2adb5b, type: 3}
   - {fileID: 114426119367828180, guid: 63bcacd377422d44ab861741b235d3fd, type: 3}
+  - {fileID: 114426119367828180, guid: d7506e253576f654caba34aa38c0d9ce, type: 3}
+  - {fileID: 114426119367828180, guid: 32cfdf835f8f8304ca496b7b657ae1e4, type: 3}
+  - {fileID: 114426119367828180, guid: 9dd0ee1d2f5a7db46823348c14228488, type: 3}
+  - {fileID: 114426119367828180, guid: 9407514f12620ed4b9bba57b00bdaa63, type: 3}
+  - {fileID: 114426119367828180, guid: 0016bae5f67fd9a42800af64317b0e0e, type: 3}
+  growthHealth: 43
+  growthMagic: 11.2
+  growthPhsyAtk: 2.3
+  growthPhysDef: 1.1
+  growthMagAtk: 3.9
+  growthMagDef: 2.4
+  growthSpeed: 0.8
 --- !u!212 &212045598115387252
 SpriteRenderer:
   m_ObjectHideFlags: 0

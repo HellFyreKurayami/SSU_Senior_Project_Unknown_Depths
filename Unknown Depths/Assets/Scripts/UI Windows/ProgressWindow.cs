@@ -7,6 +7,13 @@ public class ProgressWindow : GenericWindow
 {
     public Text value;
 
+    void Update()
+    {
+        if (Input.GetButton("Cancel"))
+        {
+            MapMaker.Instance.Stay();
+        }
+    }
     public void NextOrPrevious(bool yn)
     {
         //If true, display next text

@@ -10,6 +10,21 @@ public class StartWindow : GenericWindow {
         base.Open();
     }
 
+    public void DisplayCredits()
+    {
+        manager.Open((int)Windows.CreditsWindow - 1, true);
+    }
+
+    public void DisplayControls()
+    {
+        manager.Open((int)Windows.ControlsWindow - 1, true);
+    }
+
+    public void ExitGame()
+    {
+        Application.Quit();
+    }
+
     public void NewGame()
     {
         OnNextWindow();

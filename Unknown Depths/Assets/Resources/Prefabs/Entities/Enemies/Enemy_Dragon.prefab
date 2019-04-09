@@ -8,7 +8,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4039507553529786}
+  - component: {fileID: 399344751066633014}
   - component: {fileID: 212405688062136414}
   - component: {fileID: 61804561307727422}
   - component: {fileID: 114540213380801328}
@@ -19,8 +19,8 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4039507553529786
-Transform:
+--- !u!224 &399344751066633014
+RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -33,6 +33,11 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0.2, y: 0.2}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!212 &212405688062136414
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -123,19 +128,24 @@ MonoBehaviour:
   experience: 0
   level: 1
   position: -1
-  CurrentHealth: 100
-  MaxHealth: 100
-  CurrentMagicPoints: 100
-  MaxMagicPoints: 100
-  PhysAttack: 35
-  PhysDefense: 30
-  MagAttack: 20
-  MagDefense: 20
-  Speed: 5
+  CurrentHealth: 10000
+  MaxHealth: 10000
+  CurrentMagicPoints: 10000
+  MaxMagicPoints: 1000
+  PhysAttack: 70
+  PhysDefense: 60
+  MagAttack: 60
+  MagDefense: 45
+  Speed: 40
   Chara: 0
-  Element: 00000000
+  Element: 0000000003000000
   Skills:
   - {fileID: 114969866201547154, guid: 99aa989312c1cc54d897639e225f6113, type: 3}
   - {fileID: 114426119367828180, guid: e667ff9fea7324c4fb54f92aed30bae9, type: 3}
+  - {fileID: 114426119367828180, guid: 5d0586be8de09d741af8ac931e0f3afc, type: 3}
+  - {fileID: 114426119367828180, guid: c1f482d77ed5bc045a2e8677026460cc, type: 3}
+  - {fileID: 114426119367828180, guid: 9dd0ee1d2f5a7db46823348c14228488, type: 3}
+  - {fileID: 114426119367828180, guid: 9407514f12620ed4b9bba57b00bdaa63, type: 3}
+  - {fileID: 114426119367828180, guid: 0016bae5f67fd9a42800af64317b0e0e, type: 3}
   HealingSkills: []
-  droppedEXP: 20
+  droppedEXP: 2000000

@@ -8,7 +8,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4650852023214190}
+  - component: {fileID: 66491934811091823}
   - component: {fileID: 114401414981041838}
   - component: {fileID: 212978820418573718}
   - component: {fileID: 61822831476308270}
@@ -19,8 +19,8 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4650852023214190
-Transform:
+--- !u!224 &66491934811091823
+RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -33,6 +33,11 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0.2, y: 0.2}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &114401414981041838
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -49,19 +54,30 @@ MonoBehaviour:
   experience: 0
   level: 1
   position: 0
-  CurrentHealth: 125
-  MaxHealth: 125
-  CurrentMagicPoints: 25
-  MaxMagicPoints: 25
+  CurrentHealth: 250
+  MaxHealth: 250
+  CurrentMagicPoints: 30
+  MaxMagicPoints: 30
   PhysAttack: 50
-  PhysDefense: 35
-  MagAttack: 25
-  MagDefense: 20
-  Speed: 8
+  PhysDefense: 18
+  MagAttack: 22
+  MagDefense: 12
+  Speed: 63
   Chara: 1
   Element: 
   Skills:
   - {fileID: 114969866201547154, guid: 99aa989312c1cc54d897639e225f6113, type: 3}
+  - {fileID: 114969866201547154, guid: 3225fe9582212a840b910574ddbcc1b0, type: 3}
+  - {fileID: 114969866201547154, guid: 6bcc9ff1d8ff0dd41bb7b3e777389d76, type: 3}
+  - {fileID: 114969866201547154, guid: e4387534aaf484d4fb7e4dd8c154a268, type: 3}
+  - {fileID: 114969866201547154, guid: 5bcfb0081a044914198ad62decf94b41, type: 3}
+  growthHealth: 58
+  growthMagic: 7.2
+  growthPhsyAtk: 4.4
+  growthPhysDef: 1.9
+  growthMagAtk: 1.2
+  growthMagDef: 1.4
+  growthSpeed: 1.5
 --- !u!212 &212978820418573718
 SpriteRenderer:
   m_ObjectHideFlags: 0

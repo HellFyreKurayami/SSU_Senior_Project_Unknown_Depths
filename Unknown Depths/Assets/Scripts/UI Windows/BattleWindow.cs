@@ -37,8 +37,16 @@ public class BattleWindow : GenericWindow {
     private SpellWindow spellWindow;
     private TargetWindow targetWindow;
 
+    //private ShakeEffect shakeEffect;
+
     //Used only if the player wins the battle
     private int EXP = 0;
+
+    /*protected override void Awake()
+    {
+        shakeEffect = GetComponent<ShakeEffect>();
+        base.Awake();
+    }*/
 
     private void Start()
     {
@@ -51,6 +59,41 @@ public class BattleWindow : GenericWindow {
             Instance = this;
         }
         //spellPanel.SetActive(false);
+    }
+
+    public void StartBattleBoss(List<Entity> c, List<Entity> e, int section)
+    {
+        foreach (Entity pm in c)
+        {
+            if (!System.IO.File.Exists(Application.persistentDataPath + "/PlayerInfo/" + pm.EntityName + ".dat"))
+            {
+                pm.SaveData();
+                //Debug.Log(string.Format("{0} data file has been created", pm.EntityName));
+            }
+            //Debug.Log(Application.persistentDataPath);
+            pm.LoadData();
+        }
+        int activeParty = c.Count > 4 ? 4 : c.Count;
+
+        c.Sort((x1, x2) => x1.position.CompareTo(x2.position));
+
+        for (int i = 0; i < activeParty; i++)
+        {
+            ActiveBattleMembers.Add(SpawnGroups[0].SpawnPoints[i].spawn(c[i]));
+            //ActiveBattleMembers.Add(SpawnPoints[i + 4].spawn(c[i]));
+        }
+
+        Entity spawn = getEntityToSpawn(e);
+        ActiveBattleMembers.Add(SpawnGroups[1].SpawnPoints[1].spawn(spawn));
+
+        currentTurn = 0;
+        ActiveBattleMembers.Sort((x1, x2) => x1.Speed.CompareTo(x2.Speed));
+        ActiveBattleMembers.Reverse();
+        UpdateAction(string.Format("Battle has started against the Boss!"));
+        ToggleActionState(false);
+        UpdateCharUI();
+        //spellPanel.SetActive(false);
+        Invoke("NextAct", 3);
     }
 
     public void StartBattle(List<Entity> c, List<MapMaker.EnemySpawns> e, int floor)
@@ -87,6 +130,7 @@ public class BattleWindow : GenericWindow {
         ActiveBattleMembers.Sort((x1, x2) => x1.Speed.CompareTo(x2.Speed));
         ActiveBattleMembers.Reverse();
         UpdateAction(string.Format("Battle has started!"));
+        ToggleActionState(false);
         UpdateCharUI();
         //spellPanel.SetActive(false);
         Invoke("NextAct", 3);
@@ -138,8 +182,7 @@ public class BattleWindow : GenericWindow {
         {
             if (GetCurrentCharacter().Chara.Equals(CharaType.PLAYER))
             {
-                firstSelected = actionButtons[0].gameObject;
-                eventSystem.SetSelectedGameObject(firstSelected);
+                SelectButton(false);
                 if (GetCurrentCharacter().alive)
                 {
                     ToggleActionState(true);
@@ -172,7 +215,8 @@ public class BattleWindow : GenericWindow {
             ToggleActionState(false);
             playerAttacking = false;
             if(GetCurrentCharacter().CurrentMagicPoints != GetCurrentCharacter().MaxMagicPoints){
-                if(GetCurrentCharacter().CurrentMagicPoints + 3 > GetCurrentCharacter().MaxMagicPoints)
+                Debug.Log(string.Format("Character: {0} | Current Magic Points {1}", GetCurrentCharacter().EntityName, GetCurrentCharacter().CurrentMagicPoints));
+                if(GetCurrentCharacter().CurrentMagicPoints + 3 < GetCurrentCharacter().MaxMagicPoints)
                 {
                     GetCurrentCharacter().CurrentMagicPoints += 3;
                 }
@@ -180,7 +224,10 @@ public class BattleWindow : GenericWindow {
                 {
                     GetCurrentCharacter().CurrentMagicPoints = GetCurrentCharacter().MaxMagicPoints;
                 }
+                Debug.Log(string.Format("Character: {0} | Current Magic Points {1}", GetCurrentCharacter().EntityName, GetCurrentCharacter().CurrentMagicPoints));
+
             }
+            UpdateCharUI();
             NextTurn();
             Invoke("NextAct", 3);
             //NextAct();
@@ -200,7 +247,8 @@ public class BattleWindow : GenericWindow {
             else
             {
                 UpdateAction("Not Enough Mana to Cast " + playerSelected.SpellName);
-                //Debug.LogWarning("ERROR: Not Enough Mana to Cast " + playerSelected.SpellName);
+                Debug.LogWarning("ERROR: Not Enough Mana to Cast " + playerSelected.SpellName);
+                playerSelected = null;
                 StartCoroutine(ResetAction(string.Format("What Will {0} Do?", GetCurrentCharacter().EntityName)));
             }
         }
@@ -210,6 +258,7 @@ public class BattleWindow : GenericWindow {
     public void DoAttack(Entity caster, Entity target)
     {
         caster.CastSpell(caster.Skills[0], target);
+        //shakeEffect.Shake(target.GetComponent<RectTransform>());
     }
 
     // Enemy Controllers
@@ -251,7 +300,7 @@ public class BattleWindow : GenericWindow {
             //GetCurrentCharacter().Act();
         }
         UpdateCharUI();
-        yield return new WaitForSeconds(3.0f);
+        yield return new WaitForSeconds(2.0f);
         NextTurn();
         NextAct();
     }
@@ -288,55 +337,63 @@ public class BattleWindow : GenericWindow {
         }
     }*/
 
+
+    //Open Windows
     public void OpenSkillWindow(bool fromTarget)
     {
         if (fromTarget)
         {
             targetWindow.Close();
         }
-        ToggleActionState(false);
-        spellWindow = GenericWindow.manager.Open((int)Windows.SpellWindow - 1, false) as SpellWindow;
-        spellWindow.BuildSpellList(GetCurrentCharacter().Skills);
+        if(GetCurrentCharacter().Skills.Count > 1)
+        {
+            ToggleActionState(false);
+            spellWindow = GenericWindow.manager.Open((int)Windows.SpellWindow - 1, false) as SpellWindow;
+            spellWindow.BuildSpellList(GetCurrentCharacter().Skills);
+        }
     }
 
     public void OpenTargetWindow()
     {
         targetWindow = GenericWindow.manager.Open((int)Windows.TargetWindow - 1, false) as TargetWindow;
-        targetWindow.CreateTargetList(ActiveBattleMembers.FindAll(x => x.Chara == CharaType.ENEMY));
+        if (playerSelected == null)
+        {
+            targetWindow.CreateTargetList(ActiveBattleMembers.FindAll(x => x.Chara == CharaType.ENEMY));
+        }
+        else if (playerSelected.Type == Skill.SpellType.HEAL)
+        {
+            targetWindow.CreateTargetList(ActiveBattleMembers.FindAll(x => x.Chara == CharaType.PLAYER && x.alive && x.CurrentHealth != x.MaxHealth));
+        }
+        else if (playerSelected.Type == Skill.SpellType.REVIVE)
+        {
+            targetWindow.CreateTargetList(ActiveBattleMembers.FindAll(x => x.Chara == CharaType.PLAYER && !x.alive));
+        }
+        else if (playerSelected.Type == Skill.SpellType.ATTACK)
+        {
+            targetWindow.CreateTargetList(ActiveBattleMembers.FindAll(x => x.Chara == CharaType.ENEMY));
+        }
     }
 
-
+    public void SelectButton(bool bc)
+    {
+        if (bc)
+        {
+            firstSelected = actionButtons[1].gameObject;
+        }
+        else
+        {
+            firstSelected = actionButtons[0].gameObject;
+        }
+        eventSystem.SetSelectedGameObject(firstSelected);
+    }
 
     public void ToggleActionState(bool state)
     {
-        //ToggleSpellPanel(state);
         foreach (Button b in actionButtons)
         {
             b.interactable = state;
         }
     }
-
-    /*public void BuildSpellList(List<Skill> spells)
-    {
-        //Remove visable spells in spell panel
-        if (spellPanel.transform.childCount > 0)
-        {
-            foreach (Button b in spellPanel.transform.GetComponentsInChildren<Button>())
-            {
-                Destroy(b.gameObject);
-            }
-        }
-
-        foreach (Skill s in spells)
-        {
-            if (!s.SpellName.Equals("Basic Attack"))
-            {
-                Button spellButton = Instantiate<Button>(button, spellPanel.transform);
-                spellButton.GetComponentInChildren<Text>().text = s.SpellName;
-                spellButton.onClick.AddListener(() => SelectSpell(s));
-            }
-        }
-    }*/
 
     //End of Battle
 
@@ -353,42 +410,38 @@ public class BattleWindow : GenericWindow {
         {
             UpdateAction(string.Format("{0} has gained {1} EXP", ActiveBattleMembers[0].EntityName, EXP)); // Position 0 EXP Gain
             ActiveBattleMembers[0].experience += EXP;
-            yield return new WaitForSeconds(1.0f);
+            ActiveBattleMembers[0].CheckLevelUp();
+            UpdateCharUI();
+            yield return new WaitForSeconds(4.0f);
         }
         ActiveBattleMembers[0].SaveData();
         if (ActiveBattleMembers[1].alive)
         {
             UpdateAction(string.Format("{0} has gained {1} EXP", ActiveBattleMembers[1].EntityName, EXP)); // Position 1 EXP Gain
             ActiveBattleMembers[1].experience += EXP;
-            yield return new WaitForSeconds(1.0f);
+            ActiveBattleMembers[1].CheckLevelUp();
+            UpdateCharUI();
+            yield return new WaitForSeconds(4.0f);
         }
         ActiveBattleMembers[1].SaveData();
         if (ActiveBattleMembers[2].alive)
         {
             UpdateAction(string.Format("{0} has gained {1} EXP", ActiveBattleMembers[2].EntityName, EXP)); // Position 2 EXP Gain
             ActiveBattleMembers[2].experience += EXP;
-            yield return new WaitForSeconds(1.0f);
+            ActiveBattleMembers[2].CheckLevelUp();
+            UpdateCharUI();
+            yield return new WaitForSeconds(4.0f);
         }
         ActiveBattleMembers[2].SaveData();
         if (ActiveBattleMembers[3].alive)
         {
             UpdateAction(string.Format("{0} has gained {1} EXP", ActiveBattleMembers[3].EntityName, EXP)); // Position 3 EXP Gain
             ActiveBattleMembers[3].experience += EXP;
-            yield return new WaitForSeconds(1.0f);
+            ActiveBattleMembers[3].CheckLevelUp();
+            UpdateCharUI();
+            yield return new WaitForSeconds(4.0f);
         }
         ActiveBattleMembers[3].SaveData();
-        /*if (ActiveBattleMembers[4].alive)
-        {
-            ActiveBattleMembers[4].experience += (int)(EXP*0.6);
-            ActiveBattleMembers[4].SaveData();
-            yield return new WaitForSeconds(1.0f);
-        }
-        if (ActiveBattleMembers[5].alive)
-        {
-            ActiveBattleMembers[5].experience += (int)(EXP * 0.6);
-            ActiveBattleMembers[5].SaveData();
-            yield return new WaitForSeconds(1.0f);
-        }*/
         //Item / Gold drops
         yield return new WaitForSeconds(1.0f);
         for (int i = 0; i < ActiveBattleMembers.Count; i++)
@@ -408,6 +461,7 @@ public class BattleWindow : GenericWindow {
         playerSelected = null;
         //ToggleSpellPanel(false);
         playerAttacking = true;
+        ToggleActionState(false);
         OpenTargetWindow();
     }
 
@@ -415,7 +469,49 @@ public class BattleWindow : GenericWindow {
     {
         playerSelected = spell;
         playerAttacking = false;
-        spellWindow.Close();
-        OpenTargetWindow();
+        if(GetCurrentCharacter().CurrentMagicPoints < spell.Cost)
+        {
+            UpdateAction("Not Enough Mana to Cast " + playerSelected.SpellName);
+            Debug.LogWarning("ERROR: Not Enough Mana to Cast " + playerSelected.SpellName);
+            playerSelected = null;
+            StartCoroutine(ResetAction(string.Format("What Will {0} Do?", GetCurrentCharacter().EntityName)));
+        }
+        else
+        {
+            spellWindow.Close();
+            if (spell.Target == Skill.TargetType.SINGLE)
+            {
+                OpenTargetWindow();
+            }
+            else if (spell.Target == Skill.TargetType.AOE)
+            {
+                List<Entity> temp = new List<Entity>();
+                if (spell.Type == Skill.SpellType.ATTACK)
+                {
+                    temp = ActiveBattleMembers.FindAll(x => x.Chara == CharaType.ENEMY);
+                }
+                else if (spell.Type == Skill.SpellType.HEAL)
+                {
+                    temp = ActiveBattleMembers.FindAll(x => x.Chara == CharaType.PLAYER && x.alive);
+                }
+
+                if (GetCurrentCharacter().CastAOE(playerSelected, temp))
+                {
+                    UpdateCharUI();
+                    ToggleActionState(false);
+                    Invoke("NextAct", 3);
+                    NextTurn();
+                    playerSelected = null;
+                    //NextAct();
+                }
+                else
+                {
+                    UpdateAction("Not Enough Mana to Cast " + playerSelected.SpellName);
+                    //Debug.LogWarning("ERROR: Not Enough Mana to Cast " + playerSelected.SpellName);
+                    playerSelected = null;
+                    StartCoroutine(ResetAction(string.Format("What Will {0} Do?", GetCurrentCharacter().EntityName)));
+                }
+            }
+        }
     }
 }
