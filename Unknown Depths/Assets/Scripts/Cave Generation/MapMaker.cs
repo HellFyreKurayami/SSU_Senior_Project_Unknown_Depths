@@ -72,7 +72,8 @@ public class MapMaker : MonoBehaviour {
     private BattleWindow battleWindow;
     private FloorWindow floorWindow;
     private ProgressWindow progressWindow;
-    private int floor = 1;
+    [System.NonSerialized]
+    public int floor = 1;
 
     private int tempX;
     private int tempY;
@@ -98,6 +99,7 @@ public class MapMaker : MonoBehaviour {
         {
             Instance = this;
         }
+        MapContainer.SetActive(true);
         Directory.Delete(Application.persistentDataPath + "/PlayerInfo/", true);
         foreach (Entity p in Players)
         {
@@ -107,6 +109,7 @@ public class MapMaker : MonoBehaviour {
 
     public void Reset()
     {
+        Start();
         caveTileSprites = Resources.LoadAll<Sprite>(MapTexture.name);
         fowTileSprites = Resources.LoadAll<Sprite>(fowTexture.name);
 
@@ -133,7 +136,14 @@ public class MapMaker : MonoBehaviour {
         //Debug.Log(string.Format("Map Width: {0} | Map Height {1}", MapWidth + (5 * floor - 1), MapHeight + (5 * floor - 1)));
         Map.CreateCave(seed, caveErosion, roomThreshold, treasureChests);
         CreateGrid();
-        CenterMap(Map.caveEntranceTile.TileID);
+        if(floor == 1)
+        {
+            CenterMap(Map.StartingTile.TileID);
+        }
+        else
+        {
+            CenterMap(Map.caveEntranceTile.TileID);
+        }
         gameMaps.Add(floor, seed);
     }
 
@@ -218,7 +228,14 @@ public class MapMaker : MonoBehaviour {
         }
         else
         {
-            controller.MoveTo(Map.caveEntranceTile.TileID);
+            if(floor == 1)
+            {
+                controller.MoveTo(Map.StartingTile.TileID);
+            }
+            else
+            {
+                controller.MoveTo(Map.caveEntranceTile.TileID);
+            }
         }
 
         //Display Floor Stats
@@ -243,14 +260,18 @@ public class MapMaker : MonoBehaviour {
                 ToggleMovement(false);
             }
         }
-        else if (player.GetComponent<MapMovement>().currentTile.Equals(Map.caveEntranceTile.TileID) && floor != 1)
+        else if (floor != 1)
         {
-            if (hasMoved)
+            if (player.GetComponent<MapMovement>().currentTile.Equals(Map.caveEntranceTile.TileID))
             {
-                progressWindow = windowManager.Open((int)Windows.ProgressWindow - 1, false) as ProgressWindow;
-                progressWindow.NextOrPrevious(false);
-                yn = false;
-                ToggleMovement(false);
+                Debug.Log(string.Format("Floor: {0}", floor));
+                if (hasMoved)
+                {
+                    progressWindow = windowManager.Open((int)Windows.ProgressWindow - 1, false) as ProgressWindow;
+                    progressWindow.NextOrPrevious(false);
+                    yn = false;
+                    ToggleMovement(false);
+                }
             }
         }
         else if(type == 20) // Treasure Chest
@@ -260,14 +281,27 @@ public class MapMaker : MonoBehaviour {
         else
         {
             var chance = Random.Range(0, 1f);
-            if(chance < 0.15f && !player.GetComponent<MapMovement>().currentTile.Equals(Map.caveEntranceTile.TileID))
+            //Debug.Log(Map.caveEntranceTile.TileID);
+            if(Map.caveEntranceTile == null)
             {
-                //Debug.Log("Battle Starting");
-                MapContainer.SetActive(false);
-                StartBattle(false);
+                if(chance < 0.15f && !player.GetComponent<MapMovement>().currentTile.Equals(Map.caveExitTile.TileID))
+                {
+                    //Debug.Log("Battle Starting");
+                    MapContainer.SetActive(false);
+                    StartBattle(false);
+                }
             }
-            hasMoved = true;
+            else
+            {
+                if(chance < 0.15f && !player.GetComponent<MapMovement>().currentTile.Equals(Map.caveEntranceTile.TileID) && !player.GetComponent<MapMovement>().currentTile.Equals(Map.caveExitTile.TileID))
+                {
+                    //Debug.Log("Battle Starting");
+                    MapContainer.SetActive(false);
+                    StartBattle(false);
+                }
+            }
         }
+        hasMoved = true;
     }
 
     public void Proceed()
@@ -285,6 +319,7 @@ public class MapMaker : MonoBehaviour {
             {
                 if(floor == 10)
                 {
+                    MapContainer.SetActive(false);
                     StartBattle(true);
                 }
                 else

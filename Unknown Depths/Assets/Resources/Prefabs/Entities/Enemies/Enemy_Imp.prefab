@@ -134,9 +134,9 @@ MonoBehaviour:
   MaxMagicPoints: 500
   PhysAttack: 24
   PhysDefense: 12
-  MagAttack: 61
+  MagAttack: 29
   MagDefense: 18
-  Speed: 51
+  Speed: 59
   Chara: 0
   Element: 02000000
   Skills:

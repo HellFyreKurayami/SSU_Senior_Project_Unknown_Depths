@@ -44,10 +44,7 @@ public class PartyMember : Entity {
                 List<Skill> temp = Skills.FindAll(x => x.UnlockLevel == i + 1);
                 if (temp.Count > 0)
                 {
-                    foreach (Skill s in temp)
-                    {
-                        StartCoroutine(LearnSkill(s));
-                    }
+                    StartCoroutine(LearnSkill(temp));
                 }
                 LevelUp();
             }
@@ -56,19 +53,23 @@ public class PartyMember : Entity {
 
     public override void LevelUp()
     {
-        MaxHealth = Mathf.FloorToInt(MaxHealth+((level-1)*growthHealth)*Random.Range(0.95f, 1.05f));
-        MaxMagicPoints = Mathf.FloorToInt(MaxMagicPoints + ((level - 1) * growthMagic) * Random.Range(0.95f, 1.05f));
-        PhysAttack = Mathf.FloorToInt(PhysAttack + ((level - 1) * growthPhsyAtk) * Random.Range(0.95f, 1.05f));
-        PhysDefense = Mathf.FloorToInt(PhysDefense + ((level - 1) * growthPhysDef) * Random.Range(0.95f, 1.05f));
-        MagAttack = Mathf.FloorToInt(MagAttack + ((level - 1) * growthMagAtk) * Random.Range(0.95f, 1.05f));
-        MagDefense = Mathf.FloorToInt(MagDefense + ((level - 1) * growthMagDef) * Random.Range(0.95f, 1.05f));
-        Speed = Mathf.FloorToInt(Speed + ((level - 1) * growthSpeed) * Random.Range(0.95f, 1.05f));
+        MaxHealth = Mathf.FloorToInt(MaxHealth + (growthHealth) * Random.Range(0.95f, 1.05f));
+        MaxMagicPoints = Mathf.FloorToInt(MaxMagicPoints + (growthMagic) * Random.Range(0.95f, 1.05f));
+        PhysAttack = Mathf.FloorToInt(PhysAttack + (growthPhsyAtk) * Random.Range(0.95f, 1.05f));
+        PhysDefense = Mathf.FloorToInt(PhysDefense + (growthPhysDef) * Random.Range(0.95f, 1.05f));
+        MagAttack = Mathf.FloorToInt(MagAttack + (growthMagAtk) * Random.Range(0.95f, 1.05f));
+        MagDefense = Mathf.FloorToInt(MagDefense + (growthMagDef) * Random.Range(0.95f, 1.05f));
+        Speed = Mathf.FloorToInt(Speed + (growthSpeed) * Random.Range(0.95f, 1.05f));
         level++;
     }
 
-    IEnumerator LearnSkill(Skill s)
+    IEnumerator LearnSkill(List<Skill> learned)
     {
-        yield return new WaitForSeconds(2.0f);
-        BattleWindow.Instance.UpdateAction(string.Format("{0} has learned {1}!", EntityName, s.SpellName));
+
+        foreach(Skill s in learned)
+        {
+            yield return new WaitForSeconds(1.0f);
+            BattleWindow.Instance.UpdateAction(string.Format("{0} has learned {1}!", EntityName, s.SpellName));
+        }
     }
 }

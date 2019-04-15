@@ -52,6 +52,14 @@ public class PreciseMap
         }
     }
 
+    public PreciseTile StartingTile
+    {
+        get
+        {
+            return mapTiles.First(t => t.AutoTileID == (int)TilePiece.GRASS);
+        }
+    }
+
     public PreciseTile caveEntranceTile
     {
         get
@@ -180,7 +188,10 @@ public class PreciseMap
             PreciseTileChecker tile = renderedTiles[UnityEngine.Random.Range(0, renderedTiles.Count)];
             if(d == 0)
             {
-                mapTiles[col * tile.tileX + tile.tileY].AutoTileID = (int)TilePiece.MONSTER;
+                if(MapMaker.Instance.floor != 1)
+                {
+                    mapTiles[col * tile.tileX + tile.tileY].AutoTileID = (int)TilePiece.MONSTER;
+                }
             }
             else
             {

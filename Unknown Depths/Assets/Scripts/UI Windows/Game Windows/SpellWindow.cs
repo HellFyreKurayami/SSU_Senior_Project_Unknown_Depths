@@ -13,6 +13,21 @@ public class SpellWindow : GenericWindow
     [SerializeField]
     private Text spellText;
 
+    [SerializeField]
+    private ScrollRect scrollBar;
+
+    private float vertPos;
+    private Button[] spellButtons;
+    private int index = 0;
+    private bool stahp = false;
+
+    private void Start()
+    {
+        spellButtons = spellPanel.GetComponentsInChildren<Button>();
+        spellButtons[index].Select();
+        vertPos = 1f - ((float)index / (spellButtons.Length - 1));
+    }
+
     void Update()
     {
         if (Input.GetButtonDown("Cancel"))
@@ -21,6 +36,43 @@ public class SpellWindow : GenericWindow
             BattleWindow.Instance.SelectButton(true);
             Close();
         }
+        else if (Input.GetAxis("Horizontal") > 0 && !stahp)
+        {
+            stahp = true;
+            index = Mathf.Clamp(index + 1, 0, spellButtons.Length - 1);
+            spellButtons[index].Select();
+            vertPos = 1f - ((float)((int)(1 * (index/2))) / (spellButtons.Length / 2 - 1));
+            scrollBar.verticalNormalizedPosition = Mathf.Lerp(scrollBar.verticalNormalizedPosition, vertPos, Time.deltaTime / 0);
+        }
+        else if(Input.GetAxis("Horizontal") < 0 && !stahp)
+        {
+            stahp = true;
+            index = Mathf.Clamp(index - 1, 0, spellButtons.Length - 1);
+            spellButtons[index].Select();
+            vertPos = 1f - ((float)((int)(1 * (index / 2))) / (spellButtons.Length / 2 - 1));
+            scrollBar.verticalNormalizedPosition = Mathf.Lerp(scrollBar.verticalNormalizedPosition, vertPos, Time.deltaTime / 0);
+        }
+        else if (Input.GetAxis("Vertical") < 0 && !stahp)
+        {
+            stahp = true;
+            index = Mathf.Clamp(index + 2, 0, spellButtons.Length - 1);
+            spellButtons[index].Select();
+            vertPos = 1f - ((float)((int)(1 * (index / 2))) / (spellButtons.Length / 2 - 1));
+            scrollBar.verticalNormalizedPosition = Mathf.Lerp(scrollBar.verticalNormalizedPosition, vertPos, Time.deltaTime / 0);
+        }
+        else if (Input.GetAxis("Vertical") > 0 && !stahp)
+        {
+            stahp = true;
+            index = Mathf.Clamp(index - 2, 0, spellButtons.Length - 1);
+            spellButtons[index].Select();
+            vertPos = 1f - ((float)((int)(1 * (index / 2))) / (spellButtons.Length / 2 - 1));
+            scrollBar.verticalNormalizedPosition = Mathf.Lerp(scrollBar.verticalNormalizedPosition, vertPos, Time.deltaTime / 0);
+        }
+        else if (Input.GetAxis("Vertical") == 0 && Input.GetAxis("Horizontal") == 0)
+        {
+            stahp = false;
+        }
+        spellButtons[index].Select();
     }
 
     public void BuildSpellList(List<Skill> spells)
@@ -36,36 +88,34 @@ public class SpellWindow : GenericWindow
         
         foreach (Skill s in spells)
         {
-            if (!s.SpellName.Equals("Basic Attack") && BattleWindow.Instance.GetCurrentCharacter().level >= s.UnlockLevel)
+            Button spellButton = Instantiate<Button>(button, spellPanel.transform);
+            spellButton.GetComponentInChildren<Text>().text = s.SpellName;
+            spellButton.onClick.AddListener(() => BattleWindow.Instance.SelectSpell(s));
+            EventTrigger trigger = spellButton.gameObject.AddComponent<EventTrigger>();
+            var hover = new EventTrigger.Entry();
+            var select = new EventTrigger.Entry();
+            hover.eventID = EventTriggerType.PointerEnter;
+            select.eventID = EventTriggerType.Select;
+            hover.callback.AddListener((e) => DisplayInformation(string.Format("Cost: {0} | {1}", s.Cost, s.Description)));
+            select.callback.AddListener((e) => DisplayInformation(string.Format("Cost: {0} | {1}", s.Cost, s.Description)));
+            trigger.triggers.Add(hover);
+            trigger.triggers.Add(select);
+            //spellButton.OnSelect();
+            var nav = spellButton.navigation;
+            nav.mode = Navigation.Mode.Automatic;
+            if (spells.Count < 5)
             {
-                Button spellButton = Instantiate<Button>(button, spellPanel.transform);
-                spellButton.GetComponentInChildren<Text>().text = s.SpellName;
-                spellButton.onClick.AddListener(() => BattleWindow.Instance.SelectSpell(s));
-                EventTrigger trigger = spellButton.gameObject.AddComponent<EventTrigger>();
-                var hover = new EventTrigger.Entry();
-                var select = new EventTrigger.Entry();
-                hover.eventID = EventTriggerType.PointerEnter;
-                select.eventID = EventTriggerType.Select;
-                hover.callback.AddListener((e) => DisplayInformation(string.Format("Cost: {0} | {1}",s.Cost, s.Description)));
-                select.callback.AddListener((e) => DisplayInformation(string.Format("Cost: {0} | {1}", s.Cost, s.Description)));
-                trigger.triggers.Add(hover);
-                trigger.triggers.Add(select);
-                //spellButton.OnSelect();
-                var nav = spellButton.navigation;
-                if(spells.Count < 5)
-                {
-                    nav.mode = Navigation.Mode.Automatic;
-                }
-                else
-                {
-                    nav.mode = Navigation.Mode.Explicit;
-                }
-                spellButton.navigation = nav;
+                nav.mode = Navigation.Mode.Automatic;
             }
+            else
+            {
+                nav.mode = Navigation.Mode.Explicit;
+            }
+            //spellButton.navigation = nav;
         }
         
-        Button[] temp = spellPanel.transform.GetComponentsInChildren<Button>();
-        if(temp.Length > 0)
+        //Button[] temp = spellPanel.transform.GetComponentsInChildren<Button>();
+        /*if(temp.Length > 0)
         {
             if(temp.Length > 4)
             {
@@ -147,10 +197,10 @@ public class SpellWindow : GenericWindow
                     }
                     temp[i].navigation = nav;
                 }
-            }
-            firstSelected = temp[0].gameObject;
-            eventSystem.SetSelectedGameObject(firstSelected);
-        }
+            }*/
+            //firstSelected = temp[0].gameObject;
+            //eventSystem.SetSelectedGameObject(firstSelected);
+        //}
     }
 
     public override void Close()

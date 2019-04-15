@@ -18,7 +18,7 @@ public class Skill : MonoBehaviour{
     public TargetType Target;
     public SpellAttr Attr;
     public List<Element> Elements;
-    
+
     //private Vector3 targetPos;
 
     /*private void Update()
@@ -33,7 +33,7 @@ public class Skill : MonoBehaviour{
         }
     }*/
 
-    public void Cast(Entity caster, Entity target)
+    public void Cast(Entity caster, Entity target, bool fromTargetMenu = false)
     {
         //Debug.Log(SpellName + " was cast on " + target);
         float modifier = 1.0f;
@@ -106,7 +106,10 @@ public class Skill : MonoBehaviour{
         {
             amt = (int)((target.MaxHealth * (Random.Range(0.15f, 0.30f)) * Tier) + (Random.Range(0.01f, 0.2f) * caster.MagAttack));
             amt = amt < 1 ? 1 : amt;
-            BattleWindow.Instance.UpdateAction(string.Format("{0} cast {1} and healed {2} for {3} HP", caster.EntityName, this.SpellName, target.EntityName, amt));
+            if (!fromTargetMenu)
+            {
+                BattleWindow.Instance.UpdateAction(string.Format("{0} cast {1} and healed {2} for {3} HP", caster.EntityName, this.SpellName, target.EntityName, amt));
+            }
             target.Heal(amt);
         }
         else if(Type == SpellType.REVIVE)
@@ -124,7 +127,7 @@ public class Skill : MonoBehaviour{
         }
     }
 
-    public void CastAOE(Entity caster, List<Entity> targets)
+    public void CastAOE(Entity caster, List<Entity> targets, bool fromTargetMenu = false)
     {
         int amt = 0;
         float modifier = 1.0f;
@@ -148,6 +151,7 @@ public class Skill : MonoBehaviour{
                             amt = amt < 1 ? 1 : amt;
                             BattleWindow.Instance.UpdateAction(string.Format("{0} cast {1} against {2} and dealt {3} damage. How weak...", caster.EntityName, this.SpellName, target.EntityName, amt));
                             target.Damage(amt);
+                            Invoke("Dummy", 1.0f);
                         }
                     }
                     //Caster Attack is Strong vs Target Element
@@ -159,6 +163,7 @@ public class Skill : MonoBehaviour{
                             amt = amt < 1 ? 1 : amt;
                             BattleWindow.Instance.UpdateAction(string.Format("{0} cast {1} against {2} and dealt {3} damage. Sugoi!", caster.EntityName, this.SpellName, target.EntityName, amt));
                             target.Damage(amt);
+                            Invoke("Dummy", 1.0f);
                         }
                     }
                     //Caster Attack is Even vs Target Element
@@ -170,6 +175,7 @@ public class Skill : MonoBehaviour{
                             amt = amt < 1 ? 1 : amt;
                             BattleWindow.Instance.UpdateAction(string.Format("{0} cast {1} against {2} and dealt {3} damage.", caster.EntityName, this.SpellName, target.EntityName, amt));
                             target.Damage(amt);
+                            Invoke("Dummy", 1.0f);
                         }
                     }
                 }
@@ -181,6 +187,7 @@ public class Skill : MonoBehaviour{
                         amt = amt < 1 ? 1 : amt;
                         BattleWindow.Instance.UpdateAction(string.Format("{0} used {1} against {2} and dealt {3} damage.", caster.EntityName, this.SpellName, target.EntityName, amt));
                         target.Damage(amt);
+                        Invoke("Dummy", 1.0f);
                     }
                 }
             }
@@ -192,7 +199,11 @@ public class Skill : MonoBehaviour{
             {
                 amt = (int)((target.MaxHealth * (Random.Range(0.07f, 0.1f) * Tier)) + (Random.Range(0.01f, 0.2f) * caster.MagAttack));
                 amt = amt < 1 ? 1 : amt;
-                BattleWindow.Instance.UpdateAction(string.Format("{0} cast {1} and healed {2} for {3} HP", caster.EntityName, this.SpellName, target.EntityName, amt));
+                if (!fromTargetMenu)
+                {
+                    BattleWindow.Instance.UpdateAction(string.Format("{0} cast {1} and healed {2} for {3} HP", caster.EntityName, this.SpellName, target.EntityName, amt));
+                    Invoke("Dummy", 1.0f);
+                }
                 target.Heal(amt);
             }
         }
@@ -208,6 +219,11 @@ public class Skill : MonoBehaviour{
     {
         yield return new WaitForSeconds(1.0f);
         target.Heal(amt);
+    }
+
+    private void Dummy()
+    {
+
     }
 
     private int Resistance(List<Element> caster, List<Element> target)

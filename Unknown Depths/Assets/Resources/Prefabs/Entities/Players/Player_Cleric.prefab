@@ -68,16 +68,10 @@ MonoBehaviour:
   Skills:
   - {fileID: 114969866201547154, guid: 99aa989312c1cc54d897639e225f6113, type: 3}
   - {fileID: 114969866201547154, guid: 1a24ff7925e6e88498f2113d3b9dbcc2, type: 3}
-  - {fileID: 114969866201547154, guid: 57c507ee19a375c419744eab16f76468, type: 3}
   - {fileID: 114969866201547154, guid: a38e5b42e31db054e9e571a3e40fc026, type: 3}
-  - {fileID: 114969866201547154, guid: 7b1d34f1d627912489af478e0e5d2662, type: 3}
-  - {fileID: 114969866201547154, guid: 0d08b8ffbda437d409efc9fa219450fe, type: 3}
-  - {fileID: 114969866201547154, guid: 1de9c38eae9095048bd72ba7669a40f6, type: 3}
   - {fileID: 114969866201547154, guid: bfc876f3cf45ac549875d9e88e80c8cb, type: 3}
   - {fileID: 114969866201547154, guid: b0d2816c699faee49ac3e3e5dde3ff57, type: 3}
-  - {fileID: 114969866201547154, guid: cdedf6e423286134c8bca874b68b2423, type: 3}
   - {fileID: 114969866201547154, guid: 36213d9fc667f9b47ba79760557b0c74, type: 3}
-  - {fileID: 114969866201547154, guid: 126cc252febd0074f99c0a9b95d9b776, type: 3}
   growthHealth: 54
   growthMagic: 9.6
   growthPhsyAtk: 3.3

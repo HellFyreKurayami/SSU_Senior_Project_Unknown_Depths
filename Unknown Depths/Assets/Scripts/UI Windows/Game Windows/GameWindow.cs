@@ -14,7 +14,7 @@ public class GameWindow : GenericWindow {
 
     private void Update()
     {
-        if (Input.GetButton("Menu"))
+        if (Input.GetButton("Menu") && BattleWindow.Instance == null || Input.GetButton("Menu") && !BattleWindow.Instance.InBattle)
         {
             MapMaker.Instance.ToggleMovement(false);
             manager.Open((int)Windows.MenuWindow - 1, false);

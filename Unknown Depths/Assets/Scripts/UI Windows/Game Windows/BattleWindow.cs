@@ -31,6 +31,9 @@ public class BattleWindow : GenericWindow {
     public Skill playerSelected;
     public bool playerAttacking;
 
+    //Use for field menu
+    public bool InBattle = false;
+
     public delegate void BattleOver(bool playerWin);
     public BattleOver battleOverCall;
 
@@ -98,6 +101,7 @@ public class BattleWindow : GenericWindow {
 
     public void StartBattle(List<Entity> c, List<MapMaker.EnemySpawns> e, int floor)
     {
+        InBattle = true;
         foreach (Entity pm in c)
         {
             if (!System.IO.File.Exists(Application.persistentDataPath + "/PlayerInfo/" + pm.EntityName + ".dat"))
@@ -328,16 +332,6 @@ public class BattleWindow : GenericWindow {
         action.text = s;
     }
 
-    /*public void ToggleSpellPanel(bool state)
-    {
-        spellPanel.SetActive(state);
-        if (state == true)
-        {
-            BuildSpellList(GetCurrentCharacter().Skills);
-        }
-    }*/
-
-
     //Open Windows
     public void OpenSkillWindow(bool fromTarget)
     {
@@ -349,7 +343,7 @@ public class BattleWindow : GenericWindow {
         {
             ToggleActionState(false);
             spellWindow = GenericWindow.manager.Open((int)Windows.SpellWindow - 1, false) as SpellWindow;
-            spellWindow.BuildSpellList(GetCurrentCharacter().Skills);
+            spellWindow.BuildSpellList(GetCurrentCharacter().Skills.FindAll(x => x.UnlockLevel <= GetCurrentCharacter().level && !x.SpellName.Equals("Basic Attack")));
         }
     }
 
@@ -410,8 +404,17 @@ public class BattleWindow : GenericWindow {
         {
             UpdateAction(string.Format("{0} has gained {1} EXP", ActiveBattleMembers[0].EntityName, EXP)); // Position 0 EXP Gain
             ActiveBattleMembers[0].experience += EXP;
-            ActiveBattleMembers[0].CheckLevelUp();
+            if (ActiveBattleMembers[0].CurrentMagicPoints + (int)(ActiveBattleMembers[0].MaxMagicPoints * .3) < ActiveBattleMembers[0].MaxMagicPoints)
+            {
+                ActiveBattleMembers[0].CurrentMagicPoints += (int)(ActiveBattleMembers[0].MaxMagicPoints*.3);
+            }
+            else
+            {
+                ActiveBattleMembers[0].CurrentMagicPoints = ActiveBattleMembers[0].MaxMagicPoints;
+            }
             UpdateCharUI();
+            ActiveBattleMembers[0].CheckLevelUp();
+            //yield return new WaitForEndOfFrame();
             yield return new WaitForSeconds(4.0f);
         }
         ActiveBattleMembers[0].SaveData();
@@ -419,8 +422,17 @@ public class BattleWindow : GenericWindow {
         {
             UpdateAction(string.Format("{0} has gained {1} EXP", ActiveBattleMembers[1].EntityName, EXP)); // Position 1 EXP Gain
             ActiveBattleMembers[1].experience += EXP;
-            ActiveBattleMembers[1].CheckLevelUp();
+            if (ActiveBattleMembers[1].CurrentMagicPoints + (int)(ActiveBattleMembers[1].MaxMagicPoints * .3) < ActiveBattleMembers[1].MaxMagicPoints)
+            {
+                ActiveBattleMembers[1].CurrentMagicPoints += (int)(ActiveBattleMembers[1].MaxMagicPoints * .3);
+            }
+            else
+            {
+                ActiveBattleMembers[1].CurrentMagicPoints = ActiveBattleMembers[1].MaxMagicPoints;
+            }
             UpdateCharUI();
+            ActiveBattleMembers[1].CheckLevelUp();
+            //yield return new WaitForEndOfFrame();
             yield return new WaitForSeconds(4.0f);
         }
         ActiveBattleMembers[1].SaveData();
@@ -428,8 +440,17 @@ public class BattleWindow : GenericWindow {
         {
             UpdateAction(string.Format("{0} has gained {1} EXP", ActiveBattleMembers[2].EntityName, EXP)); // Position 2 EXP Gain
             ActiveBattleMembers[2].experience += EXP;
-            ActiveBattleMembers[2].CheckLevelUp();
+            if (ActiveBattleMembers[2].CurrentMagicPoints + (int)(ActiveBattleMembers[2].MaxMagicPoints * .3) < ActiveBattleMembers[2].MaxMagicPoints)
+            {
+                ActiveBattleMembers[2].CurrentMagicPoints += (int)(ActiveBattleMembers[2].MaxMagicPoints * .3);
+            }
+            else
+            {
+                ActiveBattleMembers[2].CurrentMagicPoints = ActiveBattleMembers[2].MaxMagicPoints;
+            }
             UpdateCharUI();
+            ActiveBattleMembers[2].CheckLevelUp();
+            //yield return new WaitForEndOfFrame();
             yield return new WaitForSeconds(4.0f);
         }
         ActiveBattleMembers[2].SaveData();
@@ -437,8 +458,17 @@ public class BattleWindow : GenericWindow {
         {
             UpdateAction(string.Format("{0} has gained {1} EXP", ActiveBattleMembers[3].EntityName, EXP)); // Position 3 EXP Gain
             ActiveBattleMembers[3].experience += EXP;
-            ActiveBattleMembers[3].CheckLevelUp();
+            if (ActiveBattleMembers[3].CurrentMagicPoints + (int)(ActiveBattleMembers[3].MaxMagicPoints * .3) < ActiveBattleMembers[3].MaxMagicPoints)
+            {
+                ActiveBattleMembers[3].CurrentMagicPoints += (int)(ActiveBattleMembers[3].MaxMagicPoints * .3);
+            }
+            else
+            {
+                ActiveBattleMembers[3].CurrentMagicPoints = ActiveBattleMembers[3].MaxMagicPoints;
+            }
             UpdateCharUI();
+            ActiveBattleMembers[3].CheckLevelUp();
+            //yield return new WaitForEndOfFrame();
             yield return new WaitForSeconds(4.0f);
         }
         ActiveBattleMembers[3].SaveData();
@@ -451,7 +481,31 @@ public class BattleWindow : GenericWindow {
         EXP = 0;
         ActiveBattleMembers.Clear();
         battleOverCall(true);
+        InBattle = false;
 
+    }
+
+    public void FleeButton()
+    {
+        UpdateAction("The party chickened out!");
+        List<Entity> players = ActiveBattleMembers.FindAll(x => x.Chara == CharaType.PLAYER);
+        foreach (Entity p in players)
+        {
+            p.SaveData();
+        }
+        Invoke("FleeBattle", 2.0f);
+    }
+
+    private void FleeBattle()
+    {
+        for (int i = 0; i < ActiveBattleMembers.Count; i++)
+        {
+            Destroy(ActiveBattleMembers[i].gameObject);
+        }
+        EXP = 0;
+        ActiveBattleMembers.Clear();
+        battleOverCall(true);
+        InBattle = false;
     }
 
     // Boolean Controllers

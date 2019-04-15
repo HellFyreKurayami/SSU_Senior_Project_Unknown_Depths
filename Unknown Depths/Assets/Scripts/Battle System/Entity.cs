@@ -47,7 +47,7 @@ public class Entity : MonoBehaviour {
         }*/
     }
 
-    public bool CastSpell(Skill s, Entity e)
+    public bool CastSpell(Skill s, Entity e, bool fromTargetMenu = false)
     {
         bool cast = CurrentMagicPoints >= s.Cost;
 
@@ -56,7 +56,7 @@ public class Entity : MonoBehaviour {
             //Uncomment this once I add particle effects. for now just need the spell to deal damage
             //Skill toCast = Instantiate<Skill>(s, transform.position, Quaternion.identity);
             CurrentMagicPoints -= s.Cost;
-            s.Cast(this, e);
+            s.Cast(this, e, fromTargetMenu);
         }
 
         return cast;
@@ -81,6 +81,15 @@ public class Entity : MonoBehaviour {
     {
         CurrentHealth = Mathf.Max(CurrentHealth - amt, 0);
         //shake.Shake(this.GetComponent<RectTransform>(), 1.0f, 2.0f);
+        /*if (CurrentHealth == 0)
+        {
+            Die();
+        }*/
+        Invoke("CheckHealth", 2.0f);
+    }
+
+    private void CheckHealth()
+    {
         if (CurrentHealth == 0)
         {
             Die();
